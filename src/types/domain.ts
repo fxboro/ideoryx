@@ -29,6 +29,14 @@ import type {
   MemoryType,
   UserMode,
   IntegrationType,
+  WorkspaceType,
+  ProductLifecycleStage,
+  ClientLifecycleStage,
+  WorkspaceStatus,
+  WorkspaceRiskLevel,
+  SignalCategory,
+  SignalSeverity,
+  SignalStatus,
 } from "./enums";
 
 // ── Base ─────────────────────────────────────────────────────
@@ -68,9 +76,45 @@ export interface Goal extends BaseEntity {
   status: GoalStatus;
   progress?: number; // 0-100
   linkedProjectIds?: string[];
+  linkedWorkspaceIds?: string[]; // NEW
+  workspaceId?: string; // NEW
 }
 
-// ── Project ──────────────────────────────────────────────────
+// ── Workspace & Project ──────────────────────────────────────
+
+export interface WorkspaceChecklistItem {
+  id: string;
+  stage: string;
+  label: string;
+  completed: boolean;
+  completedAt?: number;
+}
+
+export interface StageChecklist {
+  stage: string;
+  items: WorkspaceChecklistItem[];
+}
+
+export interface Workspace extends BaseEntity {
+  name: string;
+  workspaceType: WorkspaceType;
+  status: WorkspaceStatus;
+  summary: string;
+  stage: ProductLifecycleStage | ClientLifecycleStage;
+  readinessScore: number; // 0-100 percentage
+  checklists: Record<string, WorkspaceChecklistItem[]>;
+  stack?: string[];
+  currentFocus?: string;
+  nextMilestone?: string;
+  risk: WorkspaceRiskLevel;
+  goalId?: string;
+  organizationId?: string; // NEW (SaaS tenancy prep)
+  // Keep Project fields for V1 compatibility:
+  type?: ProjectType;
+  phase?: ProjectPhase;
+  targetUser?: string;
+  problem?: string;
+}
 
 export interface Project extends BaseEntity {
   name: string;
@@ -85,6 +129,24 @@ export interface Project extends BaseEntity {
   nextMilestone?: string;
   risk: RiskLevel;
   goalId?: string;
+  // V1.1 transition fields:
+  workspaceType?: WorkspaceType;
+  stage?: ProductLifecycleStage | ClientLifecycleStage;
+  readinessScore?: number;
+  checklists?: Record<string, WorkspaceChecklistItem[]>;
+}
+
+// ── Signal ───────────────────────────────────────────────────
+
+export interface Signal extends BaseEntity {
+  workspaceId: string;
+  title: string;
+  description: string;
+  category: SignalCategory;
+  severity: SignalSeverity;
+  status: SignalStatus;
+  source: string; // sentry, posthog, zendesk, manual
+  sourceMetadata?: Record<string, unknown>;
 }
 
 // ── Task ─────────────────────────────────────────────────────
@@ -93,6 +155,7 @@ export interface Task extends BaseEntity {
   title: string;
   description?: string;
   projectId?: string;
+  workspaceId?: string; // NEW
   type: TaskType;
   workflowId?: string;
   priority: Priority;
@@ -108,6 +171,7 @@ export interface Task extends BaseEntity {
 export interface Decision extends BaseEntity {
   title: string;
   projectId?: string;
+  workspaceId?: string; // NEW
   context: string;
   optionsConsidered: string[];
   chosenOption: string;
@@ -135,6 +199,7 @@ export interface Playbook extends BaseEntity {
   promptTemplate: string;
   lastUsed?: number;
   runCount?: number;
+  workspaceId?: string; // NEW
 }
 
 // ── Lead ─────────────────────────────────────────────────────
@@ -182,6 +247,7 @@ export interface AgentRun extends BaseEntity {
   workflowId?: string;
   workflowType?: WorkflowType;
   projectId?: string;
+  workspaceId?: string; // NEW
   leadId?: string;
   inputGoal: string;
   contextTags: string[];
@@ -207,6 +273,7 @@ export interface Memory extends BaseEntity {
   tags: string[];
   source?: string; // which agent/workflow created this
   expiresAt?: number;
+  workspaceId?: string; // NEW
 }
 
 // ── Learning ─────────────────────────────────────────────────

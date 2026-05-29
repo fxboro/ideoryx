@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Plus,
   Zap,
+  Activity,
 } from "lucide-react"
 
 import {
@@ -36,9 +37,14 @@ const data = {
       icon: LayoutDashboard,
     },
     {
-      title: "Projects",
-      url: "/projects",
+      title: "Workspaces",
+      url: "/workspaces",
       icon: Briefcase,
+    },
+    {
+      title: "Signals",
+      url: "/signals",
+      icon: Activity,
     },
     {
       title: "Agents",

@@ -10,6 +10,7 @@ import type {
   User,
   Goal,
   Project,
+  Workspace,
   Task,
   Decision,
   Playbook,
@@ -54,6 +55,17 @@ export type UpdateProjectPayload = UpdatePayload<Project>;
 
 /** Project card as rendered in lists / grids. */
 export interface ProjectListItem extends Project {
+  taskCount?: number;
+  completedTaskCount?: number;
+}
+
+// ── Workspace ────────────────────────────────────────────────
+
+export type CreateWorkspacePayload = CreatePayload<Workspace>;
+export type UpdateWorkspacePayload = UpdatePayload<Workspace>;
+
+/** Workspace card as rendered in lists / grids. */
+export interface WorkspaceListItem extends Workspace {
   taskCount?: number;
   completedTaskCount?: number;
 }

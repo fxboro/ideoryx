@@ -30,7 +30,7 @@ export function handleApiError(error: unknown) {
   console.error("API Error:", error);
   if (error instanceof z.ZodError) {
     return NextResponse.json(
-      { error: "Validation Error", details: error.errors, success: false },
+      { error: "Validation Error", details: (error as any).errors, success: false },
       { status: 400 }
     );
   }

@@ -8,6 +8,18 @@ export type ProjectPhase = "spec" | "build" | "launch" | "maintenance" | "comple
 export type ProjectType = "product" | "freelance" | "learning";
 export type ProjectStatus = "active" | "on_hold" | "completed" | "archived";
 
+// ── Workspace ────────────────────────────────────────────────
+export type WorkspaceType = "product" | "client";
+export type ProductLifecycleStage = "validation" | "spec" | "build" | "launch" | "growth";
+export type ClientLifecycleStage = "discovery" | "proposal" | "delivery" | "launch" | "support";
+export type WorkspaceStatus = "active" | "on_hold" | "completed" | "archived";
+export type WorkspaceRiskLevel = "low" | "medium" | "high";
+
+// ── Telemetry Signal ─────────────────────────────────────────
+export type SignalCategory = "performance" | "error" | "feedback" | "usage";
+export type SignalSeverity = "low" | "medium" | "high";
+export type SignalStatus = "new" | "reviewed" | "converted" | "dismissed";
+
 // ── Risk / Severity ──────────────────────────────────────────
 export type RiskLevel = "low" | "medium" | "high";
 export type Severity = "low" | "medium" | "high";
@@ -41,7 +53,12 @@ export type WorkflowType =
   | "study_plan"
   | "decision_analysis"
   | "retrospective"
-  | "custom";
+  | "custom"
+  | "validate_idea"
+  | "launch_prep"
+  | "delivery_update"
+  | "optimize_product"
+  | "analyze_signals";
 
 export type AgentRunStatus = "pending" | "running" | "completed" | "failed";
 

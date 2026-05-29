@@ -8,6 +8,16 @@ export const projectPhaseSchema = z.enum(["spec", "build", "launch", "maintenanc
 export const projectTypeSchema = z.enum(["product", "freelance", "learning"]);
 export const projectStatusSchema = z.enum(["active", "on_hold", "completed", "archived"]);
 
+export const workspaceTypeSchema = z.enum(["product", "client"]);
+export const productLifecycleStageSchema = z.enum(["validation", "spec", "build", "launch", "growth"]);
+export const clientLifecycleStageSchema = z.enum(["discovery", "proposal", "delivery", "launch", "support"]);
+export const workspaceStatusSchema = z.enum(["active", "on_hold", "completed", "archived"]);
+export const workspaceRiskLevelSchema = z.enum(["low", "medium", "high"]);
+
+export const signalCategorySchema = z.enum(["performance", "error", "feedback", "usage"]);
+export const signalSeveritySchema = z.enum(["low", "medium", "high"]);
+export const signalStatusSchema = z.enum(["new", "reviewed", "converted", "dismissed"]);
+
 export const riskLevelSchema = z.enum(["low", "medium", "high"]);
 export const severitySchema = z.enum(["low", "medium", "high"]);
 
@@ -39,6 +49,11 @@ export const workflowTypeSchema = z.enum([
   "decision_analysis",
   "retrospective",
   "custom",
+  "validate_idea",
+  "launch_prep",
+  "delivery_update",
+  "optimize_product",
+  "analyze_signals",
 ]);
 
 export const agentRunStatusSchema = z.enum(["pending", "running", "completed", "failed"]);
@@ -77,6 +92,7 @@ export const baseEntitySchema = z.object({
   userId: z.string(),
   createdAt: z.number(), // epoch ms
   updatedAt: z.number(), // epoch ms
+  sourceRunId: z.string().optional(),
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -106,6 +122,8 @@ export const goalSchema = baseEntitySchema.extend({
   status: goalStatusSchema,
   progress: z.number().min(0).max(100).optional(),
   linkedProjectIds: z.array(z.string()).optional(),
+  linkedWorkspaceIds: z.array(z.string()).optional(),
+  workspaceId: z.string().optional(),
 });
 export type GoalSchemaType = z.infer<typeof goalSchema>;
 
@@ -125,10 +143,60 @@ export const projectSchema = baseEntitySchema.extend({
 });
 export type ProjectSchemaType = z.infer<typeof projectSchema>;
 
+export const workspaceChecklistItemSchema = z.object({
+  id: z.string(),
+  stage: z.string(),
+  label: z.string(),
+  completed: z.boolean(),
+  completedAt: z.number().optional(),
+});
+
+export const stageChecklistSchema = z.object({
+  stage: z.string(),
+  items: z.array(workspaceChecklistItemSchema),
+});
+export type StageChecklistSchemaType = z.infer<typeof stageChecklistSchema>;
+
+export const workspaceSchema = baseEntitySchema.extend({
+  name: z.string().min(1, "Name is required"),
+  workspaceType: workspaceTypeSchema,
+  status: workspaceStatusSchema,
+  summary: z.string().min(1, "Summary is required"),
+  stage: z.union([productLifecycleStageSchema, clientLifecycleStageSchema]),
+  readinessScore: z.number().min(0).max(100),
+  checklists: z.record(z.string(), z.array(workspaceChecklistItemSchema)),
+  stack: z.array(z.string()).optional(),
+  currentFocus: z.string().optional(),
+  nextMilestone: z.string().optional(),
+  risk: workspaceRiskLevelSchema,
+  goalId: z.string().optional(),
+  // SaaS tenancy
+  organizationId: z.string().optional(),
+  // Backward compatibility fields for Project alias:
+  type: projectTypeSchema.optional(),
+  phase: projectPhaseSchema.optional(),
+  targetUser: z.string().optional(),
+  problem: z.string().optional(),
+});
+export type WorkspaceSchemaType = z.infer<typeof workspaceSchema>;
+
+export const signalSchema = baseEntitySchema.extend({
+  workspaceId: z.string().min(1, "Workspace ID is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: signalCategorySchema,
+  severity: signalSeveritySchema,
+  status: signalStatusSchema,
+  source: z.string().min(1, "Source is required"),
+  sourceMetadata: z.record(z.string(), z.unknown()).optional(),
+});
+export type SignalSchemaType = z.infer<typeof signalSchema>;
+
 export const taskSchema = baseEntitySchema.extend({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
   type: taskTypeSchema,
   workflowId: z.string().optional(),
   priority: prioritySchema,
@@ -143,6 +211,7 @@ export type TaskSchemaType = z.infer<typeof taskSchema>;
 export const decisionSchema = baseEntitySchema.extend({
   title: z.string().min(1, "Title is required"),
   projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
   context: z.string().min(1, "Context is required"),
   optionsConsidered: z.array(z.string()).min(1, "At least one option required"),
   chosenOption: z.string().min(1, "Chosen option is required"),
@@ -164,6 +233,7 @@ export const playbookSchema = baseEntitySchema.extend({
   promptTemplate: z.string().min(1, "Prompt template is required"),
   lastUsed: z.number().optional(),
   runCount: z.number().optional(),
+  workspaceId: z.string().optional(),
 });
 export type PlaybookSchemaType = z.infer<typeof playbookSchema>;
 
@@ -202,6 +272,7 @@ export const proposalLineItemSchema = z.object({
 export const proposalSchema = baseEntitySchema.extend({
   leadId: z.string().min(1, "Lead ID is required"),
   projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
   title: z.string().min(1, "Title is required"),
   status: proposalStatusSchema,
   problemSummary: z.string().min(1, "Problem summary is required"),
@@ -221,6 +292,7 @@ export const agentRunSchema = baseEntitySchema.extend({
   workflowId: z.string().optional(),
   workflowType: workflowTypeSchema.optional(),
   projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
   leadId: z.string().optional(),
   inputGoal: z.string().min(1, "Input goal is required"),
   contextTags: z.array(z.string()),
@@ -238,6 +310,7 @@ export const memorySchema = baseEntitySchema.extend({
   tags: z.array(z.string()),
   source: z.string().optional(),
   expiresAt: z.number().optional(),
+  workspaceId: z.string().optional(),
 });
 export type MemorySchemaType = z.infer<typeof memorySchema>;
 
@@ -253,6 +326,7 @@ export const runAgentWorkflowRequestSchema = z.object({
   workflowType: workflowTypeSchema.optional(),
   inputGoal: z.string().min(1, "Input goal is required"),
   projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
   leadId: z.string().optional(),
   contextTags: z.array(z.string()).optional(),
   context: z.string().optional(), // additional user-provided context
@@ -296,9 +370,6 @@ export const saveDecisionRequestSchema = decisionSchema.omit({
 });
 export type SaveDecisionRequest = z.infer<typeof saveDecisionRequestSchema>;
 
-/**
- * createProject request
- */
 export const createProjectRequestSchema = projectSchema.omit({
   id: true,
   createdAt: true,
@@ -311,6 +382,47 @@ export const createProjectRequestSchema = projectSchema.omit({
   phase: projectPhaseSchema.optional().default("spec"),
 });
 export type CreateProjectRequest = z.infer<typeof createProjectRequestSchema>;
+
+/**
+ * createWorkspace request
+ */
+export const createWorkspaceRequestSchema = workspaceSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+  status: true,
+  readinessScore: true,
+  checklists: true,
+}).extend({
+  status: workspaceStatusSchema.optional().default("active"),
+  readinessScore: z.number().optional().default(0),
+  checklists: z.record(z.string(), z.array(workspaceChecklistItemSchema)).optional(),
+});
+export type CreateWorkspaceRequest = z.infer<typeof createWorkspaceRequestSchema>;
+
+/**
+ * toggleChecklist request
+ */
+export const toggleChecklistRequestSchema = z.object({
+  itemId: z.string(),
+  completed: z.boolean(),
+});
+export type ToggleChecklistRequest = z.infer<typeof toggleChecklistRequestSchema>;
+
+/**
+ * createSignal request
+ */
+export const createSignalRequestSchema = signalSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+  status: true,
+}).extend({
+  status: signalStatusSchema.optional().default("new"),
+});
+export type CreateSignalRequest = z.infer<typeof createSignalRequestSchema>;
 
 /**
  * createTask request

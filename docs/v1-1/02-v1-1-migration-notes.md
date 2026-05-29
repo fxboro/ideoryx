@@ -347,3 +347,61 @@ The plan's 6-phase, 22-step sequence is correct in principle but has dependency 
 | `params` runtime crash on Next.js 15+ redirect pages | High | Medium | Use `async` component or `React.use()` pattern. |
 | Prompt `.md` files created but never loaded (dead code) | Medium | Low | Decide upfront: inline prompts (match V1) or filesystem-loaded prompts (new pattern for all). |
 | Missing Firestore indexes cause slow queries on `workspaces` collection | Low | Medium | Deploy `firestore.indexes.json` changes to emulator and production before code deploy. |
+
+---
+
+# V1.1 Migration Checklist
+
+## Step 1 — Data model
+- [x] Add Workspace type
+- [x] Add ProductLifecycleStage enum
+- [x] Add ClientLifecycleStage enum
+- [x] Add workspaceId to tasks
+- [x] Add workspaceId to decisions
+- [x] Add workspaceId to agent_runs
+- [x] Add workspaceId to playbooks
+- [x] Add optional organizationId to future-facing models
+
+## Step 2 — UI
+- [ ] Rename Projects nav to Workspaces
+- [ ] Build Workspaces list
+- [ ] Build Create Workspace flow
+- [ ] Build Workspace detail shell
+- [ ] Add Product Workspace tabs
+- [ ] Add Client Workspace tabs
+
+## Step 3 — Lifecycle
+- [ ] Add stage checklist model
+- [ ] Add readiness score utility
+- [ ] Add recommended next workflow utility
+- [ ] Show lifecycle panel on workspace overview
+
+## Step 4 — Signals
+- [ ] Add Signal type/schema
+- [ ] Add Signals page
+- [ ] Add signal detail drawer
+- [ ] Add convert signal to opportunity flow
+
+## Step 5 — Opportunities
+- [ ] Add Opportunity type/schema
+- [ ] Add Opportunities page
+- [ ] Add opportunity scoring
+- [ ] Add create tasks/decision from opportunity
+
+## Step 6 — Agents
+- [ ] Update Agents Console to use workspace context
+- [ ] Add Validation Agent
+- [ ] Add Launch Agent
+- [ ] Add Delivery Agent
+- [ ] Add Improvement Agent
+- [ ] Add Signal Analyst Agent
+
+## Step 7 — QA
+- [ ] Existing V1 pages still work
+- [ ] Existing projects are not broken
+- [ ] New workspaces can be created
+- [ ] Product workspace renders correct tabs
+- [ ] Client workspace renders correct tabs
+- [ ] Signals can be created
+- [ ] Opportunities can be created
+- [ ] Readiness score calculates correctly
