@@ -37,6 +37,8 @@ import type {
   SignalCategory,
   SignalSeverity,
   SignalStatus,
+  OpportunityStatus,
+  OpportunityCategory,
 } from "./enums";
 
 // ── Base ─────────────────────────────────────────────────────
@@ -147,6 +149,26 @@ export interface Signal extends BaseEntity {
   status: SignalStatus;
   source: string; // sentry, posthog, zendesk, manual
   sourceMetadata?: Record<string, unknown>;
+}
+
+// ── Opportunity ──────────────────────────────────────────────
+
+export interface Opportunity extends BaseEntity {
+  title: string;
+  description: string;
+  workspaceId: string;
+  status: OpportunityStatus;
+  category: OpportunityCategory;
+  score: number;
+  scoringBreakdown: {
+    impact: number;
+    confidence: number;
+    effort: number;
+    explanation: string;
+  };
+  sourceSignalIds: string[];
+  linkedTaskIds?: string[];
+  linkedDecisionIds?: string[];
 }
 
 // ── Task ─────────────────────────────────────────────────────

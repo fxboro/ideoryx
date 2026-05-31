@@ -14,6 +14,7 @@ import {
   Plus,
   Zap,
   Activity,
+  Lightbulb,
 } from "lucide-react"
 
 import {
@@ -45,6 +46,11 @@ const data = {
       title: "Signals",
       url: "/signals",
       icon: Activity,
+    },
+    {
+      title: "Opportunities",
+      url: "/opportunities",
+      icon: Lightbulb,
     },
     {
       title: "Agents",

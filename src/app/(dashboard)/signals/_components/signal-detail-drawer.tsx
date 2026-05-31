@@ -20,6 +20,7 @@ interface SignalDetailDrawerProps {
   signal: Signal | null
   workspace: Workspace | null
   onStatusChange: (signalId: string, status: SignalStatus) => void
+  onConvertClick?: (signal: Signal) => void
 }
 
 export function SignalDetailDrawer({
@@ -28,6 +29,7 @@ export function SignalDetailDrawer({
   signal,
   workspace,
   onStatusChange,
+  onConvertClick,
 }: SignalDetailDrawerProps) {
   if (!signal) return null
 
@@ -188,7 +190,13 @@ export function SignalDetailDrawer({
 
           {(signal.status === "new" || signal.status === "reviewed") && (
             <Button
-              onClick={() => onStatusChange(signal.id, "converted")}
+              onClick={() => {
+                if (onConvertClick) {
+                  onConvertClick(signal)
+                } else {
+                  onStatusChange(signal.id, "converted")
+                }
+              }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
             >
               <Lightbulb className="size-4 mr-2" /> Convert to Opportunity

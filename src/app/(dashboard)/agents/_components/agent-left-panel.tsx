@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Play, X, Loader2 } from "lucide-react"
+import { Play, X, Loader2, Sparkles } from "lucide-react"
 import {
   agentOptions,
   mockProjectOptions,
@@ -22,8 +22,12 @@ import {
   type WorkflowType,
   type WorkflowOption,
 } from "./mock-agent-data"
+import type { Workspace } from "@/types"
 
 interface AgentLeftPanelProps {
+  selectedWorkspaceId: string | null
+  onWorkspaceChange: (workspaceId: string) => void
+  workspaces: Workspace[]
   selectedAgent: AgentType | null
   selectedWorkflow: WorkflowType | null
   selectedProject: string | null
@@ -41,6 +45,9 @@ interface AgentLeftPanelProps {
 }
 
 export function AgentLeftPanel({
+  selectedWorkspaceId,
+  onWorkspaceChange,
+  workspaces,
   selectedAgent,
   selectedWorkflow,
   selectedProject,
@@ -63,6 +70,58 @@ export function AgentLeftPanel({
 
   const canRun = selectedAgent !== null && selectedWorkflow !== null && goal.trim().length > 0
 
+  // Recommend workflow logic based on selected workspace stage
+  const selectedWorkspace = workspaces.find((w) => w.id === selectedWorkspaceId)
+  
+  const recommendations: Array<{ agentId: AgentType; workflowId: WorkflowType; label: string }> = []
+  
+  if (selectedWorkspace) {
+    const stage = selectedWorkspace.stage
+    
+    if (stage === "validation") {
+      recommendations.push(
+        { agentId: "validation", workflowId: "validate_idea", label: "Validate Product Idea" },
+        { agentId: "founder", workflowId: "idea_to_mvp", label: "Scope MVP" }
+      )
+    } else if (stage === "spec") {
+      recommendations.push(
+        { agentId: "architect", workflowId: "mvp_to_technical_plan", label: "MVP to Tech Plan" },
+        { agentId: "architect", workflowId: "database_schema", label: "Database Schema Design" }
+      )
+    } else if (stage === "build") {
+      recommendations.push(
+        { agentId: "builder", workflowId: "implementation_plan", label: "Implementation Plan" },
+        { agentId: "builder", workflowId: "sprint_breakdown", label: "Sprint Breakdown" }
+      )
+    } else if (stage === "launch") {
+      recommendations.push(
+        { agentId: "launch", workflowId: "launch_prep", label: "Launch Prep" }
+      )
+    } else if (stage === "growth") {
+      recommendations.push(
+        { agentId: "improvement", workflowId: "optimize_product", label: "Optimize Product" },
+        { agentId: "signal_analyst", workflowId: "analyze_signals", label: "Analyze Signals" }
+      )
+    } else if (stage === "discovery") {
+      recommendations.push(
+        { agentId: "freelance", workflowId: "discovery_prep", label: "Discovery Prep" }
+      )
+    } else if (stage === "proposal") {
+      recommendations.push(
+        { agentId: "freelance", workflowId: "lead_to_proposal", label: "Draft Proposal" }
+      )
+    } else if (stage === "delivery") {
+      recommendations.push(
+        { agentId: "delivery", workflowId: "delivery_update", label: "Client Delivery Update" }
+      )
+    } else if (stage === "support") {
+      recommendations.push(
+        { agentId: "signal_analyst", workflowId: "analyze_signals", label: "Analyze Signals" },
+        { agentId: "improvement", workflowId: "optimize_product", label: "Optimize Product" }
+      )
+    }
+  }
+
   function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault()
@@ -80,6 +139,63 @@ export function AgentLeftPanel({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Workspace Selector */}
+      <div className="space-y-2">
+        <Label htmlFor="workspace-select" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Workspace
+        </Label>
+        <Select
+          value={selectedWorkspaceId ?? ""}
+          onValueChange={onWorkspaceChange}
+        >
+          <SelectTrigger id="workspace-select" className="w-full h-11 bg-background/80 border-border hover:border-foreground/20 transition-colors">
+            <SelectValue placeholder="Choose a workspace..." />
+          </SelectTrigger>
+          <SelectContent>
+            {workspaces.map((w) => (
+              <SelectItem key={w.id} value={w.id}>
+                {w.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {selectedWorkspace && (
+          <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-300">
+            <Badge className="bg-primary/10 text-primary border border-primary/20 capitalize font-semibold text-[10px]">
+              Type: {selectedWorkspace.workspaceType}
+            </Badge>
+            <Badge className="bg-blue-500/10 text-blue-500 border border-blue-500/20 capitalize font-semibold text-[10px]">
+              Stage: {selectedWorkspace.stage}
+            </Badge>
+          </div>
+        )}
+      </div>
+
+      {/* Recommended Workflows */}
+      {recommendations.length > 0 && (
+        <div className="space-y-2 bg-primary/5 border border-primary/10 rounded-xl p-3.5 animate-in fade-in duration-300">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+            <Sparkles className="size-3.5" /> Suggested for current stage
+          </p>
+          <div className="flex flex-col gap-1.5 pt-1">
+            {recommendations.map((rec, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  onAgentChange(rec.agentId)
+                  onWorkflowChange(rec.workflowId)
+                }}
+                className="text-left text-xs font-bold text-foreground/80 hover:text-primary hover:bg-primary/5 border border-border/60 hover:border-primary/20 bg-background rounded-lg px-3 py-2 transition-all flex items-center justify-between"
+              >
+                <span>{rec.label}</span>
+                <span className="text-[10px] text-muted-foreground group-hover:text-primary">Run →</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Agent Selector */}
       <div className="space-y-2">
         <Label htmlFor="agent-select" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

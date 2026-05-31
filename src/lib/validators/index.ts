@@ -18,6 +18,9 @@ export const signalCategorySchema = z.enum(["performance", "error", "feedback", 
 export const signalSeveritySchema = z.enum(["low", "medium", "high"]);
 export const signalStatusSchema = z.enum(["new", "reviewed", "converted", "dismissed"]);
 
+export const opportunityStatusSchema = z.enum(["open", "in_progress", "implemented", "archived"]);
+export const opportunityCategorySchema = z.enum(["growth", "performance", "security", "cost", "quality", "other"]);
+
 export const riskLevelSchema = z.enum(["low", "medium", "high"]);
 export const severitySchema = z.enum(["low", "medium", "high"]);
 
@@ -191,6 +194,36 @@ export const signalSchema = baseEntitySchema.extend({
   sourceMetadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type SignalSchemaType = z.infer<typeof signalSchema>;
+
+export const opportunityScoringBreakdownSchema = z.object({
+  impact: z.number().min(1).max(5),
+  confidence: z.number().min(1).max(5),
+  effort: z.number().min(1).max(5),
+  explanation: z.string(),
+});
+
+export const opportunitySchema = baseEntitySchema.extend({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  workspaceId: z.string().min(1, "Workspace ID is required"),
+  status: opportunityStatusSchema,
+  category: opportunityCategorySchema,
+  score: z.number().min(0).max(100),
+  scoringBreakdown: opportunityScoringBreakdownSchema,
+  sourceSignalIds: z.array(z.string()),
+  linkedTaskIds: z.array(z.string()).optional(),
+  linkedDecisionIds: z.array(z.string()).optional(),
+});
+export type OpportunitySchemaType = z.infer<typeof opportunitySchema>;
+
+export const saveOpportunityRequestSchema = opportunitySchema.omit({
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+}).extend({
+  id: z.string().optional(),
+});
+export type SaveOpportunityRequest = z.infer<typeof saveOpportunityRequestSchema>;
 
 export const taskSchema = baseEntitySchema.extend({
   title: z.string().min(1, "Title is required"),

@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       agentRole: data.agentRole,
       workflowType: data.workflowType,
       projectId: data.projectId,
+      workspaceId: data.workspaceId,
       leadId: data.leadId,
       inputGoal: data.inputGoal,
       contextTags: data.contextTags ?? [],

@@ -12,3 +12,4 @@ export * from "./learning-item.service";
 export * from "./memory.service";
 export * from "./workspace.service";
 export * from "./signal.service";
+export * from "./opportunity.service";

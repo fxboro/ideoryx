@@ -22,6 +22,7 @@ import type { SaveAction } from "@/lib/agents/types"
 interface AgentRightPanelProps {
   output: AgentRunOutput | null
   isLoading: boolean
+  onSaveAction: (actionKey: string, payload: any) => void
 }
 
 function SectionIcon({ type }: { type: OutputSection["type"] }) {
@@ -142,7 +143,7 @@ function LoadingSkeleton() {
   )
 }
 
-export function AgentRightPanel({ output, isLoading }: AgentRightPanelProps) {
+export function AgentRightPanel({ output, isLoading, onSaveAction }: AgentRightPanelProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
@@ -169,12 +170,19 @@ export function AgentRightPanel({ output, isLoading }: AgentRightPanelProps) {
     )
   }
 
-  const agentEmoji =
-    output.agentType === "founder"
-      ? "🧭"
-      : output.agentType === "architect"
-      ? "🏗️"
-      : "⚡"
+  const emojiMap: Record<string, string> = {
+    founder: "🧭",
+    architect: "🏗️",
+    builder: "⚡",
+    execution: "📈",
+    freelance: "💼",
+    validation: "🔍",
+    launch: "🚀",
+    delivery: "📦",
+    improvement: "🛠️",
+    signal_analyst: "📊",
+  }
+  const agentEmoji = emojiMap[output.agentType] || "🤖"
 
   return (
     <div className="flex flex-col">
@@ -217,7 +225,7 @@ export function AgentRightPanel({ output, isLoading }: AgentRightPanelProps) {
 
       {/* Save Actions */}
       <div className="mt-4">
-        <SaveActionsBar actions={output.saveActions || []} visible={true} />
+        <SaveActionsBar actions={output.saveActions || []} visible={true} onSave={onSaveAction} />
       </div>
     </div>
   )

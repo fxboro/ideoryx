@@ -2,13 +2,14 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { ListChecks, Scale, BookMarked, Pickaxe, Save, Target, Lightbulb } from "lucide-react"
+import { ListChecks, Scale, BookMarked, Pickaxe, Save, Target, Lightbulb, Activity, Layers } from "lucide-react"
 import { SaveActionDialog } from "@/components/save-action-dialog"
 import type { SaveAction } from "@/lib/agents/types"
 
 interface SaveActionsBarProps {
   visible: boolean
   actions?: SaveAction[]
+  onSave?: (actionKey: string, payload: any) => void
 }
 
 function getIconForCollection(collection: string) {
@@ -25,12 +26,18 @@ function getIconForCollection(collection: string) {
       return Target
     case "memories":
       return Lightbulb
+    case "signals":
+      return Activity
+    case "opportunities":
+      return Lightbulb
+    case "workspaces":
+      return Layers
     default:
       return Save
   }
 }
 
-export function SaveActionsBar({ visible, actions = [] }: SaveActionsBarProps) {
+export function SaveActionsBar({ visible, actions = [], onSave }: SaveActionsBarProps) {
   const [selectedAction, setSelectedAction] = React.useState<SaveAction | null>(null)
 
   if (!visible) return null
@@ -41,8 +48,11 @@ export function SaveActionsBar({ visible, actions = [] }: SaveActionsBarProps) {
   }
 
   function handleSave(actionKey: string, payload: any) {
-    console.log(`Saving ${actionKey} to backend:`, payload)
-    // NOTE: This is where you would call the actual firebase/db service
+    if (onSave) {
+      onSave(actionKey, payload)
+    } else {
+      console.log(`Saving ${actionKey} to backend:`, payload)
+    }
   }
 
   return (

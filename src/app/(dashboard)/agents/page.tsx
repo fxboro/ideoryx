@@ -13,6 +13,11 @@ import {
   getMockOutput,
 } from "./_components/mock-agent-data"
 import { useSearchParams } from "next/navigation"
+import { getStoredWorkspaces, saveStoredWorkspaces } from "../workspaces/_components/mock-workspaces"
+import { getStoredSignals, saveStoredSignals } from "../signals/_components/mock-signals"
+import { getStoredOpportunities, saveStoredOpportunities } from "../opportunities/_components/mock-opportunities"
+import { toast } from "sonner"
+import type { Workspace, Signal, Opportunity, Task, Decision, Playbook } from "@/types"
 
 function AgentsPageContent() {
   const searchParams = useSearchParams()
@@ -32,6 +37,20 @@ function AgentsPageContent() {
   const [goal, setGoal] = React.useState("")
   const [isRunning, setIsRunning] = React.useState(false)
   const [output, setOutput] = React.useState<AgentRunOutput | null>(null)
+  
+  const [workspaces, setWorkspaces] = React.useState<Workspace[]>([])
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = React.useState<string>("")
+
+  React.useEffect(() => {
+    const list = getStoredWorkspaces()
+    setWorkspaces(list)
+    const paramWsId = searchParams.get("workspaceId")
+    if (paramWsId && list.some((w) => w.id === paramWsId)) {
+      setSelectedWorkspaceId(paramWsId)
+    } else if (list.length > 0) {
+      setSelectedWorkspaceId(list[0].id)
+    }
+  }, [searchParams])
 
   function handleAgentChange(agent: AgentType) {
     setSelectedAgent(agent)
@@ -54,7 +73,162 @@ function AgentsPageContent() {
       const result = getMockOutput(selectedAgent, selectedWorkflow)
       setOutput(result)
       setIsRunning(false)
+      
+      // persist new run simulation to Firestore
+      fetch("/api/agent/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          agentRole: selectedAgent,
+          workflowType: selectedWorkflow,
+          inputGoal: goal || "Simulated Run",
+          workspaceId: selectedWorkspaceId,
+          projectId: selectedProject,
+          leadId: selectedLead,
+          contextTags,
+        }),
+      }).catch((e) => console.log("Silent persist skipped in frontend simulation", e))
     }, 1800)
+  }
+
+  function handleSaveAction(actionKey: string, payload: any) {
+    try {
+      const targetWorkspaceId = selectedWorkspaceId || "w1"
+      
+      // Resolve collection from output saveActions list
+      const actionDef = output?.saveActions.find((a) => a.key === actionKey)
+      const collection = actionDef?.collection || actionKey
+      
+      switch (collection) {
+        case "signals": {
+          const existing = getStoredSignals()
+          const newSignal: Signal = {
+            id: "sig_" + crypto.randomUUID().substring(0, 8),
+            userId: "user1",
+            workspaceId: targetWorkspaceId,
+            title: payload.title || "Untitled Signal",
+            description: payload.description || "",
+            category: payload.category || "performance",
+            severity: payload.severity || "medium",
+            status: "new",
+            source: payload.source || "manual",
+            sourceMetadata: payload.sourceMetadata || {},
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }
+          saveStoredSignals([newSignal, ...existing])
+          toast.success(`Signal "${newSignal.title}" successfully saved!`)
+          break
+        }
+        case "opportunities": {
+          const existing = getStoredOpportunities()
+          const newOpp: Opportunity = {
+            id: "opp_" + crypto.randomUUID().substring(0, 8),
+            userId: "user1",
+            workspaceId: targetWorkspaceId,
+            title: payload.title || "Untitled Opportunity",
+            description: payload.description || "",
+            status: "open",
+            category: payload.category || "performance",
+            score: payload.score || 0,
+            scoringBreakdown: payload.scoringBreakdown || {
+              impact: 3,
+              confidence: 3,
+              effort: 3,
+              explanation: "Calculated from default parameters.",
+            },
+            sourceSignalIds: payload.sourceSignalIds || [],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }
+          saveStoredOpportunities([newOpp, ...existing])
+          toast.success(`Opportunity "${newOpp.title}" successfully saved!`)
+          break
+        }
+        case "workspaces": {
+          const existing = getStoredWorkspaces()
+          const targetId = payload.workspaceId || targetWorkspaceId
+          const updated = existing.map((w) => {
+            if (w.id === targetId) {
+              return { ...w, stage: payload.stage, updatedAt: Date.now() }
+            }
+            return w
+          })
+          saveStoredWorkspaces(updated)
+          setWorkspaces(updated)
+          toast.success(`Workspace stage updated to "${payload.stage}"!`)
+          break
+        }
+        case "tasks": {
+          const existingData = localStorage.getItem("mission_control_tasks")
+          const existing = existingData ? JSON.parse(existingData) : []
+          const newTask: Task = {
+            id: "task_" + crypto.randomUUID().substring(0, 8),
+            userId: "user1",
+            workspaceId: targetWorkspaceId,
+            title: payload.title || "Untitled Task",
+            description: payload.description || "",
+            type: payload.type || "feature",
+            priority: payload.priority || "medium",
+            status: "todo",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }
+          localStorage.setItem("mission_control_tasks", JSON.stringify([newTask, ...existing]))
+          toast.success(`Task "${newTask.title}" successfully saved!`)
+          break
+        }
+        case "decisions": {
+          const existingData = localStorage.getItem("mission_control_decisions")
+          const existing = existingData ? JSON.parse(existingData) : []
+          const newDecision: Decision = {
+            id: "dec_" + crypto.randomUUID().substring(0, 8),
+            userId: "user1",
+            workspaceId: targetWorkspaceId,
+            title: payload.title || "Untitled Decision",
+            context: payload.context || "",
+            optionsConsidered: payload.optionsConsidered || [],
+            chosenOption: payload.chosenOption || "",
+            rationale: payload.rationale || "",
+            tradeoffs: payload.tradeoffs,
+            risks: payload.risks,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }
+          localStorage.setItem("mission_control_decisions", JSON.stringify([newDecision, ...existing]))
+          toast.success(`Decision "${newDecision.title}" successfully saved!`)
+          break
+        }
+        case "playbooks": {
+          const existingData = localStorage.getItem("mission_control_playbooks")
+          const existing = existingData ? JSON.parse(existingData) : []
+          const newPlaybook: Playbook = {
+            id: "pb_" + crypto.randomUUID().substring(0, 8),
+            userId: "user1",
+            workspaceId: targetWorkspaceId,
+            title: payload.title || "Untitled Playbook",
+            category: payload.category || "general",
+            summary: payload.summary || "",
+            tags: payload.tags || [],
+            steps: payload.steps || [],
+            checklist: payload.checklist || [],
+            promptTemplate: payload.promptTemplate || "",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          }
+          localStorage.setItem("mission_control_playbooks", JSON.stringify([newPlaybook, ...existing]))
+          toast.success(`Playbook "${newPlaybook.title}" successfully saved!`)
+          break
+        }
+        default:
+          toast.error(`Unknown collection type: ${collection}`)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Failed to save record.")
+    }
   }
 
   return (
@@ -79,6 +253,9 @@ function AgentsPageContent() {
                   </h2>
                 </div>
                 <AgentLeftPanel
+                  selectedWorkspaceId={selectedWorkspaceId}
+                  onWorkspaceChange={setSelectedWorkspaceId}
+                  workspaces={workspaces}
                   selectedAgent={selectedAgent}
                   selectedWorkflow={selectedWorkflow}
                   selectedProject={selectedProject}
@@ -110,7 +287,7 @@ function AgentsPageContent() {
                     Structured Output
                   </h2>
                 </div>
-                <AgentRightPanel output={output} isLoading={isRunning} />
+                <AgentRightPanel output={output} isLoading={isRunning} onSaveAction={handleSaveAction} />
               </div>
             </ScrollArea>
           </div>

@@ -27,8 +27,9 @@ import { getStoredWorkspaces } from "../workspaces/_components/mock-workspaces"
 import { SignalFiltersBar } from "./_components/signal-filters-bar"
 import { CreateSignalDialog } from "./_components/create-signal-dialog"
 import { SignalDetailDrawer } from "./_components/signal-detail-drawer"
+import { ConvertSignalToOpportunityDialog } from "../opportunities/_components/convert-dialog"
 
-import type { Signal, SignalStatus, Workspace } from "@/types"
+import type { Signal, SignalStatus, Workspace, Opportunity } from "@/types"
 
 export default function SignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([])
@@ -53,6 +54,33 @@ export default function SignalsPage() {
     setSignals(getStoredSignals())
     setWorkspaces(getStoredWorkspaces())
   }, [])
+
+  // Triage state for conversion wizard
+  const [triageSignal, setTriageSignal] = useState<Signal | null>(null)
+  const [isConvertOpen, setIsConvertOpen] = useState(false)
+
+  const handleConvertClick = (signal: Signal) => {
+    setTriageSignal(signal)
+    setIsConvertOpen(true)
+  }
+
+  const handleSignalConverted = (newOpportunity: Opportunity) => {
+    try {
+      const existingOpsData = localStorage.getItem("mission_control_opportunities")
+      const existingOps = existingOpsData ? JSON.parse(existingOpsData) : []
+      
+      // Prevent duplicates
+      const exists = existingOps.some((op: Opportunity) => op.id === newOpportunity.id)
+      if (!exists) {
+        localStorage.setItem("mission_control_opportunities", JSON.stringify([newOpportunity, ...existingOps]))
+      }
+    } catch (e) {
+      console.error("Failed to save opportunity during conversion", e)
+    }
+    
+    // Mark status as converted
+    handleStatusChange(newOpportunity.sourceSignalIds[0], "converted")
+  }
 
   // Ingestion handler
   const handleCreated = (newSignal: Signal) => {
@@ -396,6 +424,15 @@ export default function SignalsPage() {
         signal={selectedSignal}
         workspace={selectedSignal ? workspaces.find((w) => w.id === selectedSignal.workspaceId) || null : null}
         onStatusChange={handleStatusChange}
+        onConvertClick={handleConvertClick}
+      />
+
+      <ConvertSignalToOpportunityDialog
+        open={isConvertOpen}
+        onOpenChange={setIsConvertOpen}
+        signal={triageSignal}
+        workspaces={workspaces}
+        onConverted={handleSignalConverted}
       />
     </div>
   )

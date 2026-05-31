@@ -3,7 +3,17 @@ import type { SaveAction } from "@/lib/agents/types";
 
 // ─── Agent Type & Workflow Type ─────────────────────────────────────────────
 
-export type AgentType = "founder" | "architect" | "builder" | "execution" | "freelance";
+export type AgentType =
+  | "founder"
+  | "architect"
+  | "builder"
+  | "execution"
+  | "freelance"
+  | "validation"
+  | "launch"
+  | "delivery"
+  | "improvement"
+  | "signal_analyst";
 
 export type WorkflowType =
   | "idea_to_mvp"
@@ -16,7 +26,13 @@ export type WorkflowType =
   | "code_review_prep"
   | "sprint_breakdown"
   | "weekly_review"
-  | "lead_to_proposal";
+  | "lead_to_proposal"
+  | "discovery_prep"
+  | "validate_idea"
+  | "launch_prep"
+  | "delivery_update"
+  | "optimize_product"
+  | "analyze_signals";
 
 export interface AgentOption {
   id: AgentType;
@@ -70,6 +86,11 @@ export const agentOptions: AgentOption[] = [
         id: "lead_to_proposal",
         name: "Draft Proposal",
         description: "Turn a lead and notes into a clear draft proposal.",
+      },
+      {
+        id: "discovery_prep",
+        name: "Discovery Prep",
+        description: "Prepare for a client discovery call by researching their domain and organizing interview questions.",
       }
     ]
   },
@@ -159,6 +180,76 @@ export const agentOptions: AgentOption[] = [
       },
     ],
   },
+  {
+    id: "validation",
+    name: "Validation Agent",
+    role: "founder",
+    description: "Market validation, persona mapping, and fit checks",
+    icon: "🔍",
+    workflows: [
+      {
+        id: "validate_idea",
+        name: "Validate Product Idea",
+        description: "Analyze market positioning, target personas, and validation metrics.",
+      }
+    ]
+  },
+  {
+    id: "launch",
+    name: "Launch Agent",
+    role: "builder",
+    description: "Launch channel logistics and release preparation checklists",
+    icon: "🚀",
+    workflows: [
+      {
+        id: "launch_prep",
+        name: "Product Launch Prep",
+        description: "Generate pre-launch safety checklists and multi-channel launch checklists.",
+      }
+    ]
+  },
+  {
+    id: "delivery",
+    name: "Delivery Agent",
+    role: "freelance",
+    description: "Milestone status checks and client progress updates",
+    icon: "📦",
+    workflows: [
+      {
+        id: "delivery_update",
+        name: "Client Delivery Update",
+        description: "Generate client-friendly progress updates and document changes.",
+      }
+    ]
+  },
+  {
+    id: "improvement",
+    name: "Improvement Agent",
+    role: "builder",
+    description: "UX enhancements, performance audits, and refactoring candidates",
+    icon: "🛠️",
+    workflows: [
+      {
+        id: "optimize_product",
+        name: "Identify Product Improvements",
+        description: "Structure performance, cost, and quality candidate improvements.",
+      }
+    ]
+  },
+  {
+    id: "signal_analyst",
+    name: "Signal Analyst Agent",
+    role: "execution",
+    description: "Logs trace auditing and telemetry feed analysis",
+    icon: "📊",
+    workflows: [
+      {
+        id: "analyze_signals",
+        name: "Analyze Telemetry Signals",
+        description: "Scans active logs and recommends resolutions or conversion candidates.",
+      }
+    ]
+  }
 ];
 
 // ─── Mock Project Options (for linked project selector) ─────────────────────
@@ -649,6 +740,233 @@ export const mockFreelanceOutput: AgentRunOutput = {
 
 // ─── Output lookup helper ───────────────────────────────────────────────────
 
+export const mockValidationOutput: AgentRunOutput = {
+  agentType: "validation",
+  workflowName: "Validate Product Idea",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "validation_summary",
+      title: "Validation Summary",
+      type: "text",
+      content: "Initial validation checklist completed. Target persona verified as solo developers. Market demands align with a low-friction operating system. Suggest advancing to specification stage.",
+    },
+    {
+      id: "channels",
+      title: "Acquisition Channels",
+      type: "list",
+      content: "",
+      items: [
+        "Developer forums (Reddit r/selfhosted, Hacker News)",
+        "Open source directory listings",
+        "Direct outreach to freelance contractors",
+      ],
+    },
+  ],
+  nextBestAction: {
+    title: "Draft MVP Specification",
+    description: "Validation is solid. Advancing the workspace to 'spec' stage and drafting core features.",
+    actionLabel: "Advance Stage & Create Tasks",
+  },
+  saveActions: [
+    {
+      key: "advance_stage_validation",
+      label: "Update Lifecycle Stage (Spec)",
+      collection: "workspaces",
+      payload: {
+        stage: "spec",
+      },
+    },
+    {
+      key: "create_task_validation",
+      label: "Create User Interview Task",
+      collection: "tasks",
+      payload: {
+        title: "Conduct 5 user interviews",
+        type: "research",
+        priority: "medium",
+        description: "Draft interview guide and interview 5 developers on how they prioritize tasks daily.",
+      },
+    },
+  ],
+};
+
+export const mockLaunchOutput: AgentRunOutput = {
+  agentType: "launch",
+  workflowName: "Product Launch Prep",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "checklist",
+      title: "Launch Checklist",
+      type: "list",
+      content: "",
+      items: [
+        "Confirm SSL certificate binds cleanly",
+        "Triage and close all critical Sentry logs",
+        "Run database stress tests on connection pool",
+        "Set up social copy assets for Product Hunt launch",
+      ],
+    },
+  ],
+  nextBestAction: {
+    title: "Deploy & Advance to Growth",
+    description: "Launch prep checks passed. Advance the workspace stage to growth.",
+    actionLabel: "Deploy & Upgrade Stage",
+  },
+  saveActions: [
+    {
+      key: "advance_stage_launch",
+      label: "Update Lifecycle Stage (Growth)",
+      collection: "workspaces",
+      payload: {
+        stage: "growth",
+      },
+    },
+    {
+      key: "create_task_launch",
+      label: "Create Deployment Task",
+      collection: "tasks",
+      payload: {
+        title: "Deploy production build on Vercel",
+        type: "chore",
+        priority: "high",
+        description: "Deploy to production, configure custom domain, and bind environment variables.",
+      },
+    },
+  ],
+};
+
+export const mockDeliveryOutput: AgentRunOutput = {
+  agentType: "delivery",
+  workflowName: "Client Delivery Update",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "sprint_status",
+      title: "Sprint Status Summary",
+      type: "text",
+      content: "All Client wellness portal milestone targets met. API integration is stable. Client approved the custom layout proposal. Proceeding to finalize delivery handoff.",
+    },
+  ],
+  nextBestAction: {
+    title: "Log Client Approval",
+    description: "Save client approval decisions to confirm delivery phase and complete sprint.",
+    actionLabel: "Log Approval Decision",
+  },
+  saveActions: [
+    {
+      key: "save_decision_delivery",
+      label: "Save Handoff Decision",
+      collection: "decisions",
+      payload: {
+        title: "Approve Client Phase 2 Milestones",
+        context: "Client review session on May 31",
+        chosenOption: "Approved & Handoff completed",
+        rationale: "Deliverables verified against contract specs. Code reviewed by technical lead.",
+        optionsConsidered: ["Approve with minor fixes", "Full delay for minor changes"],
+        tradeoffs: "Closing sprint early frees capacity, but minor CSS fixes will need post-launch chore logging.",
+      },
+    },
+  ],
+};
+
+export const mockImprovementOutput: AgentRunOutput = {
+  agentType: "improvement",
+  workflowName: "Identify Product Improvements",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "improvement_points",
+      title: "Optimization Candidates",
+      type: "list",
+      content: "",
+      items: [
+        "Reduce bundle size on client-side main bundle from 1.2MB to 300KB.",
+        "Add system-level dark mode preference auto-matching.",
+        "Optimize connection pool recycle timer to 15s.",
+      ],
+    },
+  ],
+  nextBestAction: {
+    title: "Create Growth Opportunity",
+    description: "Generate structured opportunity candidates to track connection improvements.",
+    actionLabel: "Create Opportunity",
+  },
+  saveActions: [
+    {
+      key: "create_opp_improvement",
+      label: "Create Bundle Opportunity",
+      collection: "opportunities",
+      payload: {
+        title: "Optimize Landing Page Bundle Sizing",
+        description: "Current bundle size is 1.2MB, slowing down mobile FCP. Compress assets and lazy-load charts.",
+        category: "performance",
+        score: 60,
+        scoringBreakdown: {
+          impact: 4,
+          confidence: 3,
+          effort: 2,
+          explanation: "Priority score of 60/100 calculated from: High Impact (4), Medium Confidence (3), and Low Effort (2).",
+        },
+        sourceSignalIds: [],
+      },
+    },
+  ],
+};
+
+export const mockSignalAnalystOutput: AgentRunOutput = {
+  agentType: "signal_analyst",
+  workflowName: "Analyze Telemetry Signals",
+  timestamp: Date.now(),
+  sections: [
+    {
+      id: "signal_summary",
+      title: "Triage Report",
+      type: "text",
+      content: "Scanned telemetry logs. High memory usage spike detected in user layout trace. Multiple out of memory exceptions logged.",
+    },
+  ],
+  nextBestAction: {
+    title: "Create Severity Signal",
+    description: "Log a structured signal in telemetry logs to track and triage the layout exception.",
+    actionLabel: "Log Telemetry Signal",
+  },
+  saveActions: [
+    {
+      key: "create_signal_analyst",
+      label: "Create Memory Signal",
+      collection: "signals",
+      payload: {
+        title: "High memory usage in render loop",
+        description: "Telemetry flagged memory heap spike on landing page. 12 crash events recorded.",
+        category: "performance",
+        severity: "high",
+        source: "posthog",
+      },
+    },
+    {
+      key: "save_playbook_analyst",
+      label: "Save Triage Playbook",
+      collection: "playbooks",
+      payload: {
+        title: "Memory Heap Triage Guide",
+        category: "telemetry",
+        summary: "Step-by-step debug flow for memory leak issues.",
+        steps: [
+          "Open Chrome DevTools Performance Profiler",
+          "Identify garbage collection memory retainers",
+          "Check clean-up triggers in useEffect dependencies",
+        ],
+        checklist: ["Check event listeners", "Verify timer disposal"],
+        promptTemplate: "Analyze the following heap snapshot trace to find leaks...",
+      },
+    },
+  ],
+};
+
+// ─── Output lookup helper ───────────────────────────────────────────────────
+
 export function getMockOutput(
   agentType: AgentType,
   _workflowType: WorkflowType
@@ -664,6 +982,16 @@ export function getMockOutput(
       return mockExecutionOutput;
     case "freelance":
       return mockFreelanceOutput;
+    case "validation":
+      return mockValidationOutput;
+    case "launch":
+      return mockLaunchOutput;
+    case "delivery":
+      return mockDeliveryOutput;
+    case "improvement":
+      return mockImprovementOutput;
+    case "signal_analyst":
+      return mockSignalAnalystOutput;
     default:
       return null;
   }

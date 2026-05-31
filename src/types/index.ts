@@ -45,6 +45,8 @@ export type {
   SignalCategory,
   SignalSeverity,
   SignalStatus,
+  OpportunityStatus,
+  OpportunityCategory,
 } from "./enums";
 
 // Domain entities
@@ -72,6 +74,7 @@ export type {
   StudySprint,
   ServiceTemplate,
   Integration,
+  Opportunity,
 } from "./domain";
 
 // API payloads & UI view models

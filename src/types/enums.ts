@@ -20,6 +20,10 @@ export type SignalCategory = "performance" | "error" | "feedback" | "usage";
 export type SignalSeverity = "low" | "medium" | "high";
 export type SignalStatus = "new" | "reviewed" | "converted" | "dismissed";
 
+// ── Opportunity ──────────────────────────────────────────────
+export type OpportunityStatus = "open" | "in_progress" | "implemented" | "archived";
+export type OpportunityCategory = "growth" | "performance" | "security" | "cost" | "quality" | "other";
+
 // ── Risk / Severity ──────────────────────────────────────────
 export type RiskLevel = "low" | "medium" | "high";
 export type Severity = "low" | "medium" | "high";
