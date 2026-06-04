@@ -97,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent className="h-full overflow-hidden flex flex-col">
-        <SidebarMenu className="px-2 pt-4">
+        <SidebarMenu className="px-2 pt-3 gap-0.5">
           {data.navMain.map((item) => {
             const isActive = pathname === item.url || (item.url !== "/" && pathname.startsWith(item.url))
             return (
@@ -106,10 +106,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   asChild
                   isActive={isActive}
                   tooltip={item.title}
-                  className="transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
+                  className="transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group min-h-[44px] md:min-h-[36px]"
                 >
                   <Link href={item.url} className="flex items-center gap-3">
-                    <item.icon className={`size-4 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                    <item.icon className={`size-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
                     <span className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
                       {item.title}
                     </span>
@@ -127,10 +127,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               isActive={pathname === "/settings"}
               tooltip="Settings"
-              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground min-h-[44px] md:min-h-[36px]"
             >
               <Link href="/settings" className="flex items-center gap-3">
-                <Settings className="size-4 text-muted-foreground" />
+                <Settings className="size-4 shrink-0 text-muted-foreground" />
                 <span className="text-sm font-medium">Settings</span>
               </Link>
             </SidebarMenuButton>

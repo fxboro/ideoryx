@@ -16,9 +16,9 @@ export function EmptyState({ icon: Icon = Inbox, title, description, action }: E
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
         <Icon className="h-6 w-6 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-bold tracking-tight text-foreground mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
-      {action && <div>{action}</div>}
+      <h3 className="text-base md:text-lg font-bold tracking-tight text-foreground mb-1">{title}</h3>
+      <p className="text-xs md:text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
+      {action && <div className="w-full sm:w-auto [&>button]:w-full [&>button]:sm:w-auto">{action}</div>}
     </div>
   )
 }

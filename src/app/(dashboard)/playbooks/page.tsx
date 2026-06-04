@@ -34,7 +34,7 @@ export default function PlaybooksPage() {
         description="Store and rerun your best repeatable workflows."
         primaryAction={{ label: "New Playbook", icon: <Plus className="size-4" /> }}
       />
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
+      <div className="py-4 md:py-6 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
         <PlaybookFilters
           search={search}
           onSearchChange={setSearch}

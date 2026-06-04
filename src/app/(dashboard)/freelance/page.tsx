@@ -44,14 +44,14 @@ export default function FreelancePage() {
         description="Move from lead to scoped, profitable work."
         primaryAction={{ label: "New Lead", icon: <Plus className="size-4" /> }}
       />
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-8 max-w-[1600px] w-full mx-auto">
+      <div className="py-4 md:py-6 flex flex-col gap-8 max-w-[1600px] w-full mx-auto">
         {/* Pipeline Summary */}
         <PipelineSummary summary={pipelineSummary} />
 
         {/* Lead List */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h2 className="text-lg font-bold tracking-tight">Lead Pipeline</h2>
+            <h2 className="text-base md:text-lg font-bold tracking-tight">Lead Pipeline</h2>
             <SearchInput value={search} onChange={setSearch} placeholder="Search leads..." className="sm:max-w-xs" />
           </div>
           <div className="mb-4">
@@ -62,7 +62,7 @@ export default function FreelancePage() {
 
         {/* Service Templates */}
         <div>
-          <h2 className="text-lg font-bold tracking-tight mb-4">Service Templates</h2>
+          <h2 className="text-base md:text-lg font-bold tracking-tight mb-4">Service Templates</h2>
           <ServiceTemplatesGrid templates={mockServiceTemplates} />
         </div>
       </div>

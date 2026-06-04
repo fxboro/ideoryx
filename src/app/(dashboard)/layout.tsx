@@ -19,7 +19,7 @@ export default function DashboardLayout({
       <SidebarInset className="flex w-full flex-col bg-background relative overflow-hidden transition-all duration-500 ease-in-out">
         <TopNav />
         <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth focus:outline-none relative">
-           <div className="mx-auto w-full max-w-[1440px] px-0 pb-16 relative">
+           <div className="mx-auto w-full max-w-[1440px] px-4 md:px-6 lg:px-8 pb-20 md:pb-16 pb-safe relative">
               {children}
            </div>
         </main>

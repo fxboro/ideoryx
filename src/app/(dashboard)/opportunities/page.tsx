@@ -223,16 +223,16 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background/50">
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col w-full mx-auto max-w-[1600px] h-full">
+      <div className="py-4 md:py-6 flex flex-col w-full mx-auto max-w-[1600px] h-full">
         <PageHeader
           title="Growth & Optimization"
           description="Identify, prioritize, and structure candidate improvements based on real telemetry data."
         />
 
         {/* Statistic Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-4 md:mt-6">
           <Card className="border border-border/80 bg-card shadow-sm">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total candidates</p>
                 <h3 className="text-2xl font-black text-foreground mt-1">{totalCount}</h3>
@@ -243,7 +243,7 @@ export default function OpportunitiesPage() {
             </CardContent>
           </Card>
           <Card className="border border-border/80 bg-card shadow-sm">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Open priorities</p>
                 <h3 className="text-2xl font-black text-foreground mt-1">{openCount}</h3>
@@ -254,7 +254,7 @@ export default function OpportunitiesPage() {
             </CardContent>
           </Card>
           <Card className="border border-border/80 bg-card shadow-sm">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">In progress</p>
                 <h3 className="text-2xl font-black text-foreground mt-1">{progressCount}</h3>
@@ -265,7 +265,7 @@ export default function OpportunitiesPage() {
             </CardContent>
           </Card>
           <Card className="border border-border/80 bg-card shadow-sm">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Implemented</p>
                 <h3 className="text-2xl font-black text-foreground mt-1">{implementedCount}</h3>
@@ -278,7 +278,7 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* AI Opportunity Analyst Simulation Trigger */}
-        <div className="mt-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-4 rounded-xl border border-primary/15 shadow-inner">
+        <div className="mt-4 md:mt-6 flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center justify-between bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-3 md:p-4 rounded-xl border border-primary/15 shadow-inner">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 p-2 rounded-lg text-primary">
               <Sparkles className="size-5" />
@@ -355,7 +355,7 @@ export default function OpportunitiesPage() {
           </div>
         )}
 
-        <div className="mt-8 flex-1 flex flex-col">
+        <div className="mt-6 md:mt-8 flex-1 flex flex-col">
           {opportunities.length > 0 ? (
             <>
               {/* Filter Bar */}

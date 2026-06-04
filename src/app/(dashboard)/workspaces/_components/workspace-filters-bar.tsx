@@ -48,12 +48,12 @@ export function WorkspaceFiltersBar({
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Type Filter */}
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+            className="bg-background border border-border rounded-lg px-3 py-2.5 md:py-2 text-sm outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
           >
             <option value="all">All Types</option>
             <option value="product">Product</option>
@@ -64,7 +64,7 @@ export function WorkspaceFiltersBar({
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+            className="bg-background border border-border rounded-lg px-3 py-2.5 md:py-2 text-sm outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
           >
             <option value="all">All Stages</option>
             {typeFilter !== "client" && (
@@ -93,7 +93,7 @@ export function WorkspaceFiltersBar({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+            className="bg-background border border-border rounded-lg px-3 py-2.5 md:py-2 text-sm outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -106,7 +106,7 @@ export function WorkspaceFiltersBar({
           <select
             value={riskFilter}
             onChange={(e) => setRiskFilter(e.target.value)}
-            className="bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary"
+            className="bg-background border border-border rounded-lg px-3 py-2.5 md:py-2 text-sm outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
           >
             <option value="all">All Risks</option>
             <option value="low">Low Risk</option>

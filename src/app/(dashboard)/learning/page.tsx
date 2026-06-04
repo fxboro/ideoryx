@@ -20,7 +20,7 @@ export default function LearningPage() {
         title="Learning Hub"
         description="Turn real work into deliberate improvement. Track weak spots, run sprints, and level up."
       />
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
+      <div className="py-4 md:py-6 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
         {/* Sprint & Weak Spots */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <StudySprintCard sprint={mockStudySprint} />
@@ -32,7 +32,7 @@ export default function LearningPage() {
 
         {/* Learning Items */}
         <div>
-          <h2 className="text-lg font-bold tracking-tight mb-4">All Learning Items</h2>
+          <h2 className="text-base md:text-lg font-bold tracking-tight mb-4">All Learning Items</h2>
           <LearningItemsList items={mockLearningItems} />
         </div>
       </div>

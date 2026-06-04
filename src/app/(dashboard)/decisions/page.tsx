@@ -42,7 +42,7 @@ export default function DecisionsPage() {
         description="Store important technical and business choices to preserve context."
         primaryAction={{ label: "Log Decision", icon: <Scale className="size-4" /> }}
       />
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
+      <div className="py-4 md:py-6 flex flex-col gap-6 max-w-[1600px] w-full mx-auto">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <SearchInput value={search} onChange={setSearch} placeholder="Search decisions..." className="sm:max-w-sm" />
@@ -54,14 +54,14 @@ export default function DecisionsPage() {
 
         {/* Table */}
         <div className="w-full overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm text-left whitespace-nowrap">
+          <table className="w-full min-w-[600px] text-sm text-left whitespace-nowrap">
             <thead className="bg-muted text-xs uppercase font-semibold text-muted-foreground border-b border-border">
               <tr>
-                <th className="px-5 py-4">Date</th>
-                <th className="px-5 py-4">Title</th>
-                <th className="px-5 py-4">Chosen Option</th>
-                <th className="px-5 py-4">Project</th>
-                <th className="px-5 py-4 text-right">Review Due</th>
+                <th className="px-3 py-3 md:px-5 md:py-4">Date</th>
+                <th className="px-3 py-3 md:px-5 md:py-4">Title</th>
+                <th className="px-3 py-3 md:px-5 md:py-4">Chosen Option</th>
+                <th className="hidden sm:table-cell px-3 py-3 md:px-5 md:py-4">Project</th>
+                <th className="hidden md:table-cell px-3 py-3 md:px-5 md:py-4 text-right">Review Due</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -71,24 +71,24 @@ export default function DecisionsPage() {
                   onClick={() => handleSelectDecision(d)}
                   className="hover:bg-muted/10 transition-colors cursor-pointer"
                 >
-                  <td className="px-5 py-4 text-muted-foreground font-medium">
+                  <td className="px-3 py-3 md:px-5 md:py-4 text-muted-foreground font-medium">
                     {new Date(d.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </td>
-                  <td className="px-5 py-4 font-bold text-foreground">{d.title}</td>
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-3 md:px-5 md:py-4 font-bold text-foreground">{d.title}</td>
+                  <td className="px-3 py-3 md:px-5 md:py-4">
                     <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">
                       {d.chosenOption}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-muted-foreground">{d.projectId || "—"}</td>
-                  <td className="px-5 py-4 text-right text-muted-foreground">
+                  <td className="hidden sm:table-cell px-3 py-3 md:px-5 md:py-4 text-muted-foreground">{d.projectId || "—"}</td>
+                  <td className="hidden md:table-cell px-3 py-3 md:px-5 md:py-4 text-right text-muted-foreground">
                     {d.reviewDate ? new Date(d.reviewDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-3 py-12 text-center text-muted-foreground">
                     No decisions match your filters.
                   </td>
                 </tr>

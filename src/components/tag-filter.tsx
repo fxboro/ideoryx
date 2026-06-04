@@ -21,10 +21,10 @@ export function TagFilter({ tags, selected, onChange, className }: TagFilterProp
   }
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 overflow-x-auto md:overflow-x-visible md:flex-wrap scroll-hidden pb-1 md:pb-0 ${className}`}>
       <button
         onClick={() => onChange([])}
-        className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border ${
+        className={`px-3 py-2 md:py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border whitespace-nowrap shrink-0 ${
           isAllSelected
             ? "bg-primary text-primary-foreground border-primary shadow-sm"
             : "bg-transparent text-muted-foreground border-border hover:bg-muted hover:text-foreground"
@@ -38,7 +38,7 @@ export function TagFilter({ tags, selected, onChange, className }: TagFilterProp
           <button
             key={tag}
             onClick={() => toggle(tag)}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border capitalize ${
+            className={`px-3 py-2 md:py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border capitalize whitespace-nowrap shrink-0 ${
               isActive
                 ? "bg-primary text-primary-foreground border-primary shadow-sm"
                 : "bg-transparent text-muted-foreground border-border hover:bg-muted hover:text-foreground"

@@ -16,7 +16,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background/50">
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col w-full mx-auto max-w-[1600px] h-full">
+      <div className="py-4 md:py-6 flex flex-col w-full mx-auto max-w-[1600px] h-full">
         <PageHeader
           title="Projects"
           description="Manage your product builds, freelance work, and learning missions."

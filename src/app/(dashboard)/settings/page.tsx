@@ -36,7 +36,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Configure identity memory, preferences, and operating rules."
       />
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col lg:flex-row gap-8 max-w-[1200px] w-full mx-auto">
+      <div className="py-4 md:py-6 flex flex-col lg:flex-row gap-8 max-w-[1200px] w-full mx-auto">
         {/* Left Nav */}
         <nav className="lg:w-56 shrink-0">
           <ul className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
@@ -47,7 +47,7 @@ export default function SettingsPage() {
                 <li key={s.id}>
                   <button
                     onClick={() => setActiveSection(s.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium w-full transition-all whitespace-nowrap ${
+                    className={`flex items-center gap-2.5 px-3 py-3 lg:py-2.5 rounded-lg text-sm font-medium w-full transition-all whitespace-nowrap ${
                       isActive
                         ? "bg-primary/10 text-primary font-bold"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -67,7 +67,7 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-border bg-card overflow-hidden">
             {/* Profile */}
             {activeSection === "profile" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Profile</h3>
                   <p className="text-xs text-muted-foreground">Your identity information.</p>
@@ -94,7 +94,7 @@ export default function SettingsPage() {
 
             {/* Mission */}
             {activeSection === "mission" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Mission Statement</h3>
                   <p className="text-xs text-muted-foreground">Define the objective your AI agents will hold as context.</p>
@@ -105,7 +105,7 @@ export default function SettingsPage() {
 
             {/* Preferred Stack */}
             {activeSection === "stack" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Preferred Stack</h3>
                   <p className="text-xs text-muted-foreground">Technologies your agents will prioritize in recommendations.</p>
@@ -124,7 +124,7 @@ export default function SettingsPage() {
 
             {/* Weekly Capacity */}
             {activeSection === "capacity" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Weekly Capacity</h3>
                   <p className="text-xs text-muted-foreground">How many hours per week are available for work?</p>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
 
             {/* Business Focus */}
             {activeSection === "business" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Business Focus</h3>
                   <p className="text-xs text-muted-foreground">What types of work are you focusing on?</p>
@@ -157,7 +157,7 @@ export default function SettingsPage() {
 
             {/* Growth Focus */}
             {activeSection === "growth" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Growth Focus</h3>
                   <p className="text-xs text-muted-foreground">Skills and areas you want to develop.</p>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
 
             {/* Integrations */}
             {activeSection === "integrations" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Integrations</h3>
                   <p className="text-xs text-muted-foreground">Connect external tools and services.</p>
@@ -212,7 +212,7 @@ export default function SettingsPage() {
 
             {/* Agent Preferences */}
             {activeSection === "agents" && (
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-5">
                 <div>
                   <h3 className="text-base font-bold mb-1">Agent Preferences</h3>
                   <p className="text-xs text-muted-foreground">Configure behavior for each AI agent role.</p>
@@ -248,8 +248,8 @@ export default function SettingsPage() {
             )}
 
             {/* Save Footer */}
-            <div className="p-5 border-t border-border bg-muted/10 flex justify-end">
-              <Button onClick={handleSave} className="font-bold gap-1.5">
+            <div className="p-4 md:p-5 border-t border-border bg-muted/10 flex justify-end">
+              <Button onClick={handleSave} className="w-full sm:w-auto font-bold gap-1.5">
                 {saved ? <Check className="size-4" /> : <Save className="size-4" />}
                 {saved ? "Saved!" : "Save Preferences"}
               </Button>

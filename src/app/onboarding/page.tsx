@@ -73,15 +73,19 @@ export default function OnboardingPage() {
               const isComplete = s.id < step
               return (
                 <div key={s.id} className="flex flex-col items-center gap-1.5 flex-1">
-                  <div className={`flex items-center justify-center size-10 rounded-full border-2 transition-all ${
+                  <div className={`flex items-center justify-center size-8 sm:size-10 rounded-full border-2 transition-all ${
                     isComplete ? "bg-primary border-primary text-primary-foreground" :
-                    isActive ? "border-primary text-primary bg-primary/10" :
+                    isActive ? "border-primary text-primary bg-primary/10 animate-pulse" :
                     "border-border text-muted-foreground"
                   }`}>
-                    {isComplete ? <Check className="size-4" /> : <StepIcon className="size-4" />}
+                    {isComplete ? <Check className="size-3.5 sm:size-4" /> : <StepIcon className="size-3.5 sm:size-4" />}
                   </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                    isActive ? "text-primary" : isComplete ? "text-foreground" : "text-muted-foreground"
+                  <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    isActive
+                      ? "text-primary block"
+                      : isComplete
+                        ? "text-foreground hidden sm:block"
+                        : "text-muted-foreground hidden sm:block"
                   }`}>
                     {s.label}
                   </span>
@@ -93,7 +97,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Step Content */}
-        <div className="p-6 md:p-8 border rounded-2xl bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="p-4 sm:p-6 md:p-8 border rounded-2xl bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Step 1: Identity */}
           {step === 1 && (
             <div className="space-y-5">
@@ -300,22 +304,22 @@ export default function OnboardingPage() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
           {step === 1 ? (
-            <Link href="/today" className="text-sm text-muted-foreground font-medium hover:text-foreground transition-colors">
+            <Link href="/today" className="text-sm text-muted-foreground font-medium hover:text-foreground transition-colors text-center py-2.5">
               Skip for now
             </Link>
           ) : (
-            <Button variant="outline" onClick={() => setStep((s) => s - 1)} className="font-bold gap-1.5">
+            <Button variant="outline" onClick={() => setStep((s) => s - 1)} className="w-full sm:w-auto font-bold gap-1.5 h-11">
               <ArrowLeft className="size-3.5" /> Back
             </Button>
           )}
           {step < 5 ? (
-            <Button onClick={() => setStep((s) => s + 1)} className="font-bold gap-1.5">
+            <Button onClick={() => setStep((s) => s + 1)} className="w-full sm:w-auto font-bold gap-1.5 h-11">
               Next <ArrowRight className="size-3.5" />
             </Button>
           ) : (
-            <Button asChild className="font-bold gap-1.5 shadow-lg shadow-primary/20">
+            <Button asChild className="w-full sm:w-auto font-bold gap-1.5 h-11 shadow-lg shadow-primary/20">
               <Link href="/today">
                 <Zap className="size-3.5" /> Launch Dashboard
               </Link>

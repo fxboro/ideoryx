@@ -37,7 +37,7 @@ export function WorkspaceCardGrid({ workspaces }: WorkspaceCardGridProps) {
                 </div>
                 <StatusBadge status={w.status} />
               </div>
-              <CardTitle className="text-xl font-bold truncate group-hover:text-primary transition-colors leading-tight">{w.name}</CardTitle>
+              <CardTitle className="text-lg md:text-xl font-bold truncate group-hover:text-primary transition-colors leading-tight">{w.name}</CardTitle>
               <div className="flex items-center gap-1.5 mt-1.5">
                 <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                   {w.workspaceType}

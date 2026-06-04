@@ -231,7 +231,7 @@ export default function SignalsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background/50">
-      <div className="p-4 md:p-6 lg:p-8 flex flex-col w-full mx-auto max-w-[1600px] h-full">
+      <div className="py-4 md:py-6 flex flex-col w-full mx-auto max-w-[1600px] h-full">
         <PageHeader
           title="Telemetry Signals"
           description="Consolidated stream of manual logs, performance anomalies, server errors, and client feedbacks."
@@ -243,7 +243,7 @@ export default function SignalsPage() {
         />
 
         {/* Page Actions/AI banner */}
-        <div className="mt-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-4 rounded-xl border border-primary/15 shadow-inner">
+        <div className="mt-4 md:mt-6 flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center justify-between bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-3 md:p-4 rounded-xl border border-primary/15 shadow-inner">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 p-2 rounded-lg text-primary">
               <Sparkles className="size-5" />
@@ -271,7 +271,7 @@ export default function SignalsPage() {
           </Button>
         </div>
 
-        <div className="mt-8 flex-1 flex flex-col">
+        <div className="mt-6 md:mt-8 flex-1 flex flex-col">
           {signals.length > 0 ? (
             <>
               {/* Filters Bar */}
@@ -315,7 +315,7 @@ export default function SignalsPage() {
 
                           <div className="space-y-1 min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[320px] md:max-w-[480px]">
+                              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px] sm:max-w-[320px] md:max-w-[480px]">
                                 {signal.title}
                               </h3>
                               <Badge className="bg-muted text-muted-foreground capitalize text-[10px] py-0 px-1.5 font-normal">
@@ -343,7 +343,7 @@ export default function SignalsPage() {
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground line-clamp-1">{signal.description}</p>
-                            <div className="flex items-center gap-4 flex-wrap pt-0.5 text-[11px] text-muted-foreground">
+                            <div className="flex items-center gap-2 md:gap-4 flex-wrap pt-0.5 text-[11px] text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 {getSourceIcon(signal.source)}
                                 <span className="capitalize">{signal.source}</span>

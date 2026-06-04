@@ -239,12 +239,12 @@ function AgentsPageContent() {
       />
 
       <div className="flex-1 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 h-full max-w-[1400px] mx-auto">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 h-full max-w-[1400px] mx-auto">
           {/* Left Panel — Input Controls */}
           <div className="lg:col-span-4 xl:col-span-4 border-b lg:border-b-0 lg:border-r border-border/50">
-            <ScrollArea className="h-full">
-              <div className="p-4 md:p-6 lg:p-8">
-                <div className="flex items-center gap-2 mb-6">
+            <ScrollArea className="h-auto lg:h-full max-h-[50vh] lg:max-h-none">
+              <div className="p-4 md:p-5 lg:p-8">
+                <div className="flex items-center gap-2 mb-4 md:mb-6">
                   <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10">
                     <span className="text-xs font-black text-primary">IN</span>
                   </div>
@@ -276,10 +276,10 @@ function AgentsPageContent() {
           </div>
 
           {/* Right Panel — Output */}
-          <div className="lg:col-span-8 xl:col-span-8">
-            <ScrollArea className="h-full">
-              <div className="p-4 md:p-6 lg:p-8">
-                <div className="flex items-center gap-2 mb-6">
+          <div className="lg:col-span-8 xl:col-span-8 flex-1">
+            <ScrollArea className="h-auto lg:h-full">
+              <div className="p-4 md:p-5 lg:p-8">
+                <div className="flex items-center gap-2 mb-4 md:mb-6">
                   <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10">
                     <span className="text-xs font-black text-primary">OUT</span>
                   </div>
