@@ -4,6 +4,8 @@ import * as React from "react"
 import { StatusBadge } from "@/components/status-badge"
 import { ProgressBar } from "@/components/progress-bar"
 import { Badge } from "@/components/ui/badge"
+import { GraduationCap } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
 import type { LearningItem } from "@/types"
 
 interface LearningItemsListProps {
@@ -17,6 +19,16 @@ const skillColors = {
 }
 
 export function LearningItemsList({ items }: LearningItemsListProps) {
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        icon={GraduationCap}
+        title="No learning items found"
+        description="There are no learning items logged yet."
+      />
+    )
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="overflow-x-auto">

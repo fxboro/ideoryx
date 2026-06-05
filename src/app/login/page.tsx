@@ -13,11 +13,11 @@ export default function LoginPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
             <Zap className="size-6 fill-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Mission Control AI</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">Ideoryx</h1>
           <p className="text-sm text-muted-foreground font-medium">Log in to access your operating OS.</p>
         </div>
         <Button asChild className="h-12 md:h-11 w-full font-bold shadow-md">
-          <Link href="/today">Enter Mission Control</Link>
+          <Link href="/today">Enter Ideoryx</Link>
         </Button>
       </div>
     </div>

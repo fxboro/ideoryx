@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { mockPlaybooks } from "../_components/mock-playbooks"
 import { EmptyState } from "@/components/empty-state"
 
-export default function PlaybookDetailPage({ params }: { params: { playbookId: string } }) {
-  const playbookId = params.playbookId
+export default function PlaybookDetailPage({ params }: { params: Promise<{ playbookId: string }> }) {
+  const resolvedParams = React.use(params)
+  const playbookId = resolvedParams.playbookId
   const playbook = mockPlaybooks.find((p) => p.id === playbookId)
   const [checkedItems, setCheckedItems] = React.useState<Set<number>>(new Set())
   const [copied, setCopied] = React.useState(false)

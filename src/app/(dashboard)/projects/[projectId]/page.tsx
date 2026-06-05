@@ -9,11 +9,10 @@ import { EmptyState } from "@/components/empty-state"
 import { FolderX, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-export default function ProjectDetailPage({ params }: { params: { projectId: string } }) {
-  // Wait unwrapping params requires using React.use for Next.js app router 15+, 
-  // but since we are focusing on V1 frontend shell, typical sync access works if not async.
-  // We'll safely treat it as sync for this mock shell until backend data fetching replaces it.
-  const projectId = params.projectId
+export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
+  // Unwrap parameters via React.use for Next.js 15+ App Router compliance
+  const resolvedParams = React.use(params)
+  const projectId = resolvedParams.projectId
   
   const project = mockProjects.find(p => p.id === projectId)
 

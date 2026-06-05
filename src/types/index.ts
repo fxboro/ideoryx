@@ -61,7 +61,6 @@ export type {
   Signal,
   Task,
   Decision,
-  PlaybookStep,
   Playbook,
   Lead,
   ProposalLineItem,

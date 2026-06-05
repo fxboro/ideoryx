@@ -32,6 +32,7 @@ export function TopNav() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             placeholder="Search everything..."
+            aria-label="Search everything"
             className="h-9 w-full rounded-md border border-input bg-muted/50 pl-9 pr-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all duration-200"
           />
         </div>
@@ -44,6 +45,7 @@ export function TopNav() {
               <input
                 autoFocus
                 placeholder="Search..."
+                aria-label="Search mobile"
                 onBlur={() => setMobileSearchOpen(false)}
                 className="h-10 w-full rounded-md border border-input bg-muted/50 pl-9 pr-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all"
               />

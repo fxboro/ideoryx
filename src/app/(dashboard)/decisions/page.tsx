@@ -3,6 +3,7 @@
 import * as React from "react"
 import { PageHeader } from "@/components/page-header"
 import { Scale } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
 import { SearchInput } from "@/components/search-input"
 import { TagFilter } from "@/components/tag-filter"
 import { DecisionDetailDrawer } from "./_components/decision-detail-drawer"
@@ -88,8 +89,26 @@ export default function DecisionsPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-12 text-center text-muted-foreground">
-                    No decisions match your filters.
+                  <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
+                    <EmptyState
+                      icon={Scale}
+                      title="No decisions found"
+                      description="No decisions match your filters."
+                      action={
+                        (search !== "" || selectedProjects.length > 0) ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearch("")
+                              setSelectedProjects([])
+                            }}
+                            className="text-xs font-bold text-primary hover:underline mt-2"
+                          >
+                            Clear filters
+                          </button>
+                        ) : undefined
+                      }
+                    />
                   </td>
                 </tr>
               )}

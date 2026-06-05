@@ -61,7 +61,7 @@ export default function OnboardingPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
             <Zap className="size-5" />
           </div>
-          <span className="text-xl font-extrabold tracking-tight">Mission Control</span>
+          <span className="text-xl font-extrabold tracking-tight">Ideoryx</span>
         </div>
 
         {/* Step Indicator */}

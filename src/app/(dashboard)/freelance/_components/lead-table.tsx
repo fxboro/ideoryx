@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { StatusBadge } from "@/components/status-badge"
+import { Briefcase } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
 import type { Lead } from "@/types"
 
 interface LeadTableProps {
@@ -16,6 +18,16 @@ const urgencyColors = {
 }
 
 export function LeadTable({ leads, onSelectLead }: LeadTableProps) {
+  if (leads.length === 0) {
+    return (
+      <EmptyState
+        icon={Briefcase}
+        title="No leads found"
+        description="No leads match your current pipeline filters."
+      />
+    )
+  }
+
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
       <table className="w-full min-w-[800px] text-sm text-left whitespace-nowrap">

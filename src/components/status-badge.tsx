@@ -3,7 +3,28 @@
 import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 
-type StatusType = "active" | "completed" | "on_hold" | "archived" | "todo" | "in_progress" | "blocked" | "done" | "draft" | "sent" | "accepted" | "rejected" | "new" | "qualified" | "proposal_sent" | "won" | "lost" | "pending" | "failed" | string;
+import type {
+  ProjectStatus,
+  TaskStatus,
+  GoalStatus,
+  LeadStatus,
+  ProposalStatus,
+  AgentRunStatus,
+  SignalStatus,
+  OpportunityStatus,
+  LearningStatus,
+} from "@/types"
+
+export type StatusType =
+  | ProjectStatus
+  | TaskStatus
+  | GoalStatus
+  | LeadStatus
+  | ProposalStatus
+  | AgentRunStatus
+  | SignalStatus
+  | OpportunityStatus
+  | LearningStatus;
 
 interface StatusBadgeProps {
   status: StatusType;

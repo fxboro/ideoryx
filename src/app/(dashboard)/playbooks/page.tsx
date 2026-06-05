@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import { PageHeader } from "@/components/page-header"
-import { Plus } from "lucide-react"
+import { Plus, BookOpen } from "lucide-react"
 import { PlaybookCard } from "./_components/playbook-card"
 import { PlaybookFilters } from "./_components/playbook-filters"
 import { mockPlaybooks } from "./_components/mock-playbooks"
+import { EmptyState } from "@/components/empty-state"
 
 export default function PlaybooksPage() {
   const [search, setSearch] = React.useState("")
@@ -51,19 +52,26 @@ export default function PlaybooksPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-sm font-medium text-muted-foreground">No playbooks match your filters.</p>
-            <button
-              onClick={() => {
-                setSearch("")
-                setSelectedCategories([])
-                setSelectedTags([])
-              }}
-              className="text-xs font-bold text-primary mt-2 hover:underline"
-            >
-              Clear all filters
-            </button>
-          </div>
+          <EmptyState
+            icon={BookOpen}
+            title="No playbooks found"
+            description="No playbooks match your current filters."
+            action={
+              (search !== "" || selectedCategories.length > 0 || selectedTags.length > 0) ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("")
+                    setSelectedCategories([])
+                    setSelectedTags([])
+                  }}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  Clear all filters
+                </button>
+              ) : undefined
+            }
+          />
         )}
       </div>
     </div>

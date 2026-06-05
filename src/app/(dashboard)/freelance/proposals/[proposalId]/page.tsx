@@ -10,8 +10,9 @@ import { SectionCard } from "@/components/section-card"
 import { EmptyState } from "@/components/empty-state"
 import { mockProposals, mockLeads } from "../../_components/mock-freelance"
 
-export default function ProposalDetailPage({ params }: { params: { proposalId: string } }) {
-  const proposalId = params.proposalId
+export default function ProposalDetailPage({ params }: { params: Promise<{ proposalId: string }> }) {
+  const resolvedParams = React.use(params)
+  const proposalId = resolvedParams.proposalId
   const proposal = mockProposals.find((p) => p.id === proposalId)
 
   if (!proposal) {

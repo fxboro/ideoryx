@@ -9,7 +9,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mission Control AI",
+  title: "Ideoryx",
   description: "Your personal AI operating system for building, freelancing, and learning.",
 };
 

@@ -4,10 +4,10 @@ import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, AlertTriangle, ArrowDown, ArrowUp, Flag } from "lucide-react"
 
-type PriorityType = "low" | "medium" | "high" | "urgent" | string;
+import type { Priority } from "@/types";
 
 interface PriorityBadgeProps {
-  priority: PriorityType;
+  priority: Priority;
   className?: string;
 }
 

@@ -206,11 +206,6 @@ export interface Decision extends BaseEntity {
 
 // ── Playbook ─────────────────────────────────────────────────
 
-export interface PlaybookStep {
-  label: string;
-  description?: string;
-}
-
 export interface Playbook extends BaseEntity {
   title: string;
   category: string;

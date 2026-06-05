@@ -1,12 +1,13 @@
 {
-  "name": "mission-control-ai",
+  "name": "ideoryx",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -33,6 +34,7 @@
     "eslint-config-next": "16.2.2",
     "shadcn": "^4.1.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

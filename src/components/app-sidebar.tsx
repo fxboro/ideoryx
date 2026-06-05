@@ -91,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Zap className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="text-sm font-bold tracking-tight">Mission Control</span>
+            <span className="text-sm font-bold tracking-tight">Ideoryx</span>
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Operating OS</span>
           </div>
         </div>
