@@ -47,6 +47,7 @@ import type {
 export interface BaseEntity {
   id: string;
   userId: string;
+  organizationId?: string; // NEW (SaaS tenancy prep)
   createdAt: number; // epoch ms
   updatedAt: number; // epoch ms
   sourceRunId?: string; // Links this entity to the agent run that created it
@@ -110,7 +111,6 @@ export interface Workspace extends BaseEntity {
   nextMilestone?: string;
   risk: WorkspaceRiskLevel;
   goalId?: string;
-  organizationId?: string; // NEW (SaaS tenancy prep)
   // Keep Project fields for V1 compatibility:
   type?: ProjectType;
   phase?: ProjectPhase;

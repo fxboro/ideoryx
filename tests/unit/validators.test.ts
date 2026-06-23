@@ -6,6 +6,9 @@ import {
   weeklyReviewRequestSchema,
   createProposalDraftRequestSchema,
   runAgentWorkflowRequestSchema,
+  workspaceSchema,
+  signalSchema,
+  opportunitySchema,
 } from "@/lib/validators";
 
 describe("Zod Validators Unit Tests", () => {
@@ -148,6 +151,192 @@ describe("Zod Validators Unit Tests", () => {
 
       const result = runAgentWorkflowRequestSchema.safeParse(payload);
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe("Workspace Schema", () => {
+    it("should validate a correct workspace payload", () => {
+      const payload = {
+        id: "ws-123",
+        userId: "user-123",
+        organizationId: "org-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        name: "My Workspace",
+        workspaceType: "product",
+        status: "active",
+        summary: "A product workspace summary",
+        stage: "validation",
+        readinessScore: 50,
+        checklists: {
+          validation: [
+            { id: "item-1", stage: "validation", label: "Check this", completed: false }
+          ]
+        },
+        risk: "low"
+      };
+
+      const result = workspaceSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject workspace payload with invalid stage or missing type", () => {
+      const payloadMissingType = {
+        id: "ws-123",
+        userId: "user-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        name: "My Workspace",
+        status: "active",
+        summary: "A workspace missing type",
+        stage: "validation",
+        readinessScore: 50,
+        checklists: {},
+        risk: "low"
+      };
+
+      const payloadInvalidStage = {
+        id: "ws-123",
+        userId: "user-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        name: "My Workspace",
+        workspaceType: "product",
+        status: "active",
+        summary: "A workspace with invalid stage",
+        stage: "invalid_stage",
+        readinessScore: 50,
+        checklists: {},
+        risk: "low"
+      };
+
+      expect(workspaceSchema.safeParse(payloadMissingType).success).toBe(false);
+      expect(workspaceSchema.safeParse(payloadInvalidStage).success).toBe(false);
+    });
+
+    it("should reject workspace payload with out-of-range readinessScore", () => {
+      const payload = {
+        id: "ws-123",
+        userId: "user-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        name: "My Workspace",
+        workspaceType: "product",
+        status: "active",
+        summary: "Readiness score test",
+        stage: "validation",
+        readinessScore: 150, // Max is 100
+        checklists: {},
+        risk: "low"
+      };
+
+      expect(workspaceSchema.safeParse(payload).success).toBe(false);
+    });
+  });
+
+  describe("Signal Schema", () => {
+    it("should validate a correct signal payload", () => {
+      const payload = {
+        id: "sig-123",
+        userId: "user-123",
+        organizationId: "org-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        workspaceId: "ws-123",
+        title: "Database Error",
+        description: "Firestore transaction aborted due to timeout",
+        category: "error",
+        severity: "high",
+        status: "new",
+        source: "sentry"
+      };
+
+      const result = signalSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject signal payload with missing workspaceId or invalid severity", () => {
+      const payloadMissingWorkspace = {
+        id: "sig-123",
+        userId: "user-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        title: "Database Error",
+        description: "Firestore transaction aborted due to timeout",
+        category: "error",
+        severity: "high",
+        status: "new",
+        source: "sentry"
+      };
+
+      const payloadInvalidSeverity = {
+        id: "sig-123",
+        userId: "user-123",
+        workspaceId: "ws-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        title: "Database Error",
+        description: "Firestore transaction aborted due to timeout",
+        category: "error",
+        severity: "critical", // Invalid severity
+        status: "new",
+        source: "sentry"
+      };
+
+      expect(signalSchema.safeParse(payloadMissingWorkspace).success).toBe(false);
+      expect(signalSchema.safeParse(payloadInvalidSeverity).success).toBe(false);
+    });
+  });
+
+  describe("Opportunity Schema", () => {
+    it("should validate a correct opportunity payload", () => {
+      const payload = {
+        id: "opp-123",
+        userId: "user-123",
+        organizationId: "org-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        title: "Enable CDN Caching",
+        description: "Cache static assets at edge locations to reduce load times",
+        workspaceId: "ws-123",
+        status: "open",
+        category: "performance",
+        score: 75,
+        scoringBreakdown: {
+          impact: 4,
+          confidence: 4,
+          effort: 1,
+          explanation: "Low effort, high impact optimization"
+        },
+        sourceSignalIds: ["sig-123"]
+      };
+
+      const result = opportunitySchema.safeParse(payload);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject opportunity payload with scoring fields out of 1-5 range", () => {
+      const payload = {
+        id: "opp-123",
+        userId: "user-123",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        title: "Enable CDN Caching",
+        description: "Cache static assets at edge locations to reduce load times",
+        workspaceId: "ws-123",
+        status: "open",
+        category: "performance",
+        score: 75,
+        scoringBreakdown: {
+          impact: 6, // Max 5
+          confidence: 4,
+          effort: 1,
+          explanation: "Out of range impact"
+        },
+        sourceSignalIds: []
+      };
+
+      expect(opportunitySchema.safeParse(payload).success).toBe(false);
     });
   });
 });

@@ -93,6 +93,7 @@ export const integrationTypeSchema = z.enum([
 export const baseEntitySchema = z.object({
   id: z.string(),
   userId: z.string(),
+  organizationId: z.string().optional(), // NEW (SaaS tenancy prep)
   createdAt: z.number(), // epoch ms
   updatedAt: z.number(), // epoch ms
   sourceRunId: z.string().optional(),
@@ -173,8 +174,6 @@ export const workspaceSchema = baseEntitySchema.extend({
   nextMilestone: z.string().optional(),
   risk: workspaceRiskLevelSchema,
   goalId: z.string().optional(),
-  // SaaS tenancy
-  organizationId: z.string().optional(),
   // Backward compatibility fields for Project alias:
   type: projectTypeSchema.optional(),
   phase: projectPhaseSchema.optional(),
