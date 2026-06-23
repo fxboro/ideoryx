@@ -16,7 +16,7 @@ This document tracks all defects, inconsistencies, and design deviations identif
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **BUG-001** | 🟡 Medium | Types (Domain) | 🔵 Verified | `BaseEntity` is missing the `organizationId?: string` field required for SaaS tenant partitioning. It is currently defined inside `Workspace` only. | [domain.ts:L47](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/types/domain.ts#L47-L53) |
 | **BUG-002** | 🟡 Medium | Firestore Config | 🟢 Resolved | Missing composite indexes for `signals` and `opportunities` queries in `firestore.indexes.json`. | [firestore.indexes.json](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.indexes.json) |
-| **BUG-003** | 🟡 Medium | Firestore Rules | 🟢 Resolved | The `signals` and `opportunities` collections are missing from the `firestore.rules` whitelist collections array. | [firestore.rules:L49](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) |
+| **BUG-003** | 🟡 Medium | Firestore Rules | 🔵 Verified | The `signals` and `opportunities` collections are missing from the `firestore.rules` whitelist collections array. | [firestore.rules:L49](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) |
 
 ---
 
@@ -60,5 +60,5 @@ This document tracks all defects, inconsistencies, and design deviations identif
 *   **Recommended Resolution**:
     *   Add `'signals'` and `'opportunities'` to the collection whitelist arrays in `firestore.rules` on lines 49, 52, and 55.
 *   **Resolution Details**:
-    *   **Status**: Fixed in engineering; awaiting QA check.
-    *   **Details**: Added `'signals'` and `'opportunities'` to the whitelist arrays in [firestore.rules](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) for `read, delete`, `create`, and `update` matches.
+    *   **Status**: 🔵 Verified by QA.
+    *   **Details**: Added `'signals'` and `'opportunities'` to the whitelist arrays in [firestore.rules](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) for `read, delete`, `create`, and `update` matches. Verified that compilation is successful and all tests pass cleanly.
