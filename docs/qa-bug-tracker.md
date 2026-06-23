@@ -16,6 +16,7 @@ This document tracks all defects, inconsistencies, and design deviations identif
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **BUG-001** | 🟡 Medium | Types (Domain) | 🔵 Verified | `BaseEntity` is missing the `organizationId?: string` field required for SaaS tenant partitioning. It is currently defined inside `Workspace` only. | [domain.ts:L47](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/types/domain.ts#L47-L53) |
 | **BUG-002** | 🟡 Medium | Firestore Config | 🟢 Resolved | Missing composite indexes for `signals` and `opportunities` queries in `firestore.indexes.json`. | [firestore.indexes.json](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.indexes.json) |
+| **BUG-003** | 🟡 Medium | Firestore Rules | 🟢 Resolved | The `signals` and `opportunities` collections are missing from the `firestore.rules` whitelist collections array. | [firestore.rules:L49](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) |
 
 ---
 
@@ -48,3 +49,16 @@ This document tracks all defects, inconsistencies, and design deviations identif
 *   **Resolution Details**:
     *   **Status**: Fixed in engineering; awaiting QA check.
     *   **Details**: Appended the 4 missing composite indexes (2 for `signals` and 2 for `opportunities`) to [firestore.indexes.json](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.indexes.json) to cover all filtered listing queries.
+
+### BUG-003: `firestore.rules` whitelist missing `signals` and `opportunities`
+*   **Severity**: 🟡 Medium
+*   **Impact**: Client-side queries targeting these new collections will be blocked by Firestore, causing permission denied failures on the frontend if accessed client-side.
+*   **Steps to Reproduce**:
+    1. Open `firestore.rules`.
+    2. Inspect lines 49, 52, and 55.
+    3. Observe that only `workspaces` was added to the list, while `signals` and `opportunities` are missing.
+*   **Recommended Resolution**:
+    *   Add `'signals'` and `'opportunities'` to the collection whitelist arrays in `firestore.rules` on lines 49, 52, and 55.
+*   **Resolution Details**:
+    *   **Status**: Fixed in engineering; awaiting QA check.
+    *   **Details**: Added `'signals'` and `'opportunities'` to the whitelist arrays in [firestore.rules](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) for `read, delete`, `create`, and `update` matches.
