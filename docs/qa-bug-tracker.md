@@ -20,6 +20,7 @@ This document tracks all defects, inconsistencies, and design deviations identif
 | **BUG-004** | 🔴 High | Agent Orchestration (Prompts) | 🔵 Verified | `formatWorkspace` helper is missing, and prompt templates/resolvers for the 5 new V1.1 workflows (`validate_idea`, `launch_prep`, `delivery_update`, `optimize_product`, `analyze_signals`) are not implemented. | [prompt-templates.ts:L19](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/lib/agents/prompt-templates.ts#L19-L30) |
 | **BUG-005** | 🔴 High | UI Redirects | 🔵 Verified | Legacy `/projects` and `/projects/[projectId]` pages do not redirect to `/workspaces` and `/workspaces/[workspaceId]`. | [projects/page.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/projects/page.tsx) |
 | **BUG-006** | 🔴 High | Freelance UI | 🟢 Resolved | "New Lead" button on `/freelance` page is unresponsive — missing `onClick` handler in `primaryAction` prop. No `CreateLeadDialog` component existed. | [freelance/page.tsx:L45](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/freelance/page.tsx#L45) |
+| **BUG-007** | 🔴 High | Workspace UI | 🟢 Resolved | "Run Agent" button on `/workspaces/[workspaceId]` page is unresponsive — missing `onClick` or `href` to launch agent with context. | [workspace-detail-header.tsx:L31](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/workspaces/[workspaceId]/_components/workspace-detail-header.tsx#L31) |
 
 
 ---
@@ -115,6 +116,22 @@ This document tracks all defects, inconsistencies, and design deviations identif
 *   **Resolution Details**:
     *   **Status**: 🟢 Resolved (awaiting QA verification).
     *   **Files Changed**: `src/app/(dashboard)/freelance/page.tsx`, `src/app/(dashboard)/freelance/_components/create-lead-dialog.tsx` [NEW]
+
+### BUG-007: "Run Agent" button on `/workspaces/[workspaceId]` page is unresponsive
+*   **Severity**: 🔴 High
+*   **Impact**: Users cannot quickly jump into the Agent workspace with their current workspace context, disrupting the core workflow of the platform.
+*   **Steps to Reproduce**:
+    1. Navigate to a workspace detail page (e.g. `/workspaces/w1`).
+    2. Click the "Run Agent" button in the header.
+    3. Observe that nothing happens.
+*   **Root Cause**: The `Button` component in `WorkspaceDetailHeader` lacked an `onClick` handler or `asChild` Link wrapper. It was purely visual.
+*   **Resolution**:
+    1. Added the `asChild` prop to the `Button`.
+    2. Wrapped the button contents in a `<Link href={\`/agents?workspaceId=\${workspace.id}\`}>`.
+    3. Verified that the `agents` page properly parses the `workspaceId` query parameter and auto-selects the workspace.
+*   **Resolution Details**:
+    *   **Status**: 🟢 Resolved (awaiting QA verification).
+    *   **Files Changed**: `src/app/(dashboard)/workspaces/[workspaceId]/_components/workspace-detail-header.tsx`
 
 
 

@@ -28,9 +28,11 @@ export function WorkspaceDetailHeader({ workspace }: WorkspaceDetailHeaderProps)
            </div>
            <p className="text-sm font-medium text-muted-foreground max-w-3xl leading-relaxed">{workspace.summary}</p>
         </div>
-        <Button className="font-bold gap-2 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 shrink-0 hover:scale-105 active:scale-95 transition-all">
-           <Zap className="w-4 h-4 fill-primary-foreground" />
-           Run Agent
+        <Button asChild className="font-bold gap-2 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 shrink-0 hover:scale-105 active:scale-95 transition-all">
+           <Link href={`/agents?workspaceId=${workspace.id}`}>
+             <Zap className="w-4 h-4 fill-primary-foreground" />
+             Run Agent
+           </Link>
          </Button>
       </div>
     </div>
