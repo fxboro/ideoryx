@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { projectService } from "@/lib/services/project.service";
 import { decisionService } from "@/lib/services/decision.service";
+import { workspaceService, signalService, opportunityService } from "@/lib/services";
 import { mockProject } from "../fixtures/mock-data";
 import { mockFirestoreInstance } from "../setup";
 
@@ -116,6 +117,109 @@ describe("Firestore Services Integration Tests", () => {
       const decision = await decisionService.getById(decisionId);
       expect(decision).not.toBeNull();
       expect(decision?.chosenOption).toBe("Firebase");
+    });
+  });
+
+  describe("Workspace Service", () => {
+    it("should successfully create a workspace and seed default checklists", async () => {
+      const workspaceId = "ws-test-123";
+      await workspaceService.createWorkspace(workspaceId, {
+        userId: "test-user-id",
+        name: "Service Test Workspace",
+        workspaceType: "product",
+        status: "active",
+        summary: "A product workspace summary",
+        stage: "validation",
+        risk: "low",
+      });
+
+      const retrieved = await workspaceService.getWorkspaceById(workspaceId);
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.name).toBe("Service Test Workspace");
+      expect(retrieved?.workspaceType).toBe("product");
+      expect(retrieved?.checklists).toBeDefined();
+      expect(retrieved?.checklists.validation).toBeDefined();
+      expect(retrieved?.checklists.validation.length).toBe(4);
+      expect(retrieved?.readinessScore).toBe(0);
+    });
+
+    it("should toggle a checklist item and update the readinessScore correctly", async () => {
+      const workspaceId = "ws-test-toggle";
+      await workspaceService.createWorkspace(workspaceId, {
+        userId: "test-user-id",
+        name: "Toggle Test Workspace",
+        workspaceType: "product",
+        status: "active",
+        summary: "Workspace toggle testing",
+        stage: "validation",
+        risk: "low",
+      });
+
+      // Toggle first item to completed
+      const updated = await workspaceService.toggleChecklistItem(workspaceId, "validation", "v1", true);
+      expect(updated.checklists.validation[0].completed).toBe(true);
+      expect(updated.checklists.validation[0].completedAt).toBeTypeOf("number");
+      expect(updated.readinessScore).toBe(25); // 1 of 4 is 25%
+
+      // Toggle back to false
+      const updated2 = await workspaceService.toggleChecklistItem(workspaceId, "validation", "v1", false);
+      expect(updated2.checklists.validation[0].completed).toBe(false);
+      expect(updated2.checklists.validation[0].completedAt).toBeUndefined();
+      expect(updated2.readinessScore).toBe(0);
+    });
+  });
+
+  describe("Signal Service", () => {
+    it("should successfully create a signal and list signals by workspace", async () => {
+      const signalId = "sig-service-123";
+      await signalService.createSignal(signalId, {
+        userId: "test-user-id",
+        workspaceId: "workspace-abc",
+        title: "Database Error",
+        description: "Firestore transaction timeout",
+        category: "error",
+        severity: "high",
+        status: "new",
+        source: "sentry"
+      });
+
+      const retrieved = await signalService.getSignalById(signalId);
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.title).toBe("Database Error");
+
+      const list = await signalService.listSignalsByWorkspace("workspace-abc");
+      expect(list.length).toBe(1);
+      expect(list[0].id).toBe(signalId);
+    });
+  });
+
+  describe("Opportunity Service", () => {
+    it("should successfully create an opportunity and list opportunities by workspace", async () => {
+      const oppId = "opp-service-123";
+      await opportunityService.createOpportunity(oppId, {
+        userId: "test-user-id",
+        workspaceId: "workspace-abc",
+        title: "Enable CDN Caching",
+        description: "Cache static assets",
+        status: "open",
+        category: "performance",
+        score: 75,
+        scoringBreakdown: {
+          impact: 4,
+          confidence: 4,
+          effort: 1,
+          explanation: "Low effort, high impact"
+        },
+        sourceSignalIds: ["sig-service-123"]
+      });
+
+      const retrieved = await opportunityService.getOpportunityById(oppId);
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.title).toBe("Enable CDN Caching");
+
+      const list = await opportunityService.listOpportunitiesByWorkspace("workspace-abc");
+      expect(list.length).toBe(1);
+      expect(list[0].id).toBe(oppId);
     });
   });
 });
