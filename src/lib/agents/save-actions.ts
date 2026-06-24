@@ -5,13 +5,18 @@
 // ─────────────────────────────────────────────────────────────
 
 import type {
-  V1WorkflowId,
+  AllWorkflowId,
   SaveAction,
   IdeaToMvpOutput,
   MvpToTechnicalPlanOutput,
   FeatureToBuildPlanOutput,
   LeadToProposalOutput,
   WeeklyReviewOutput,
+  ValidateIdeaOutput,
+  LaunchPrepOutput,
+  DeliveryUpdateOutput,
+  OptimizeProductOutput,
+  AnalyzeSignalsOutput,
   WorkflowOutput,
 } from "./types";
 
@@ -21,19 +26,25 @@ import type {
  * write the user can trigger from the UI.
  */
 export function mapSaveActions(
-  workflowId: V1WorkflowId,
+  workflowId: AllWorkflowId,
   output: WorkflowOutput,
-  projectId?: string,
+  projectId?: string, // functions as workspaceId for V1.1 workflows
   leadId?: string,
   agentRunId?: string
 ): SaveAction[] {
-  const mappers: Record<V1WorkflowId, () => SaveAction[]> = {
+  const mappers: Record<AllWorkflowId, () => SaveAction[]> = {
     idea_to_mvp: () => mapIdeaToMvpActions(output as IdeaToMvpOutput),
     mvp_to_technical_plan: () => mapMvpToTechnicalPlanActions(output as MvpToTechnicalPlanOutput, projectId),
     feature_to_build_plan: () => mapFeatureToBuildPlanActions(output as FeatureToBuildPlanOutput, projectId),
     lead_to_proposal: () => mapLeadToProposalActions(output as LeadToProposalOutput, leadId, projectId),
     weekly_review: () => mapWeeklyReviewActions(output as WeeklyReviewOutput),
+    validate_idea: () => mapValidateIdeaActions(output as ValidateIdeaOutput, projectId),
+    launch_prep: () => mapLaunchPrepActions(output as LaunchPrepOutput, projectId),
+    delivery_update: () => mapDeliveryUpdateActions(output as DeliveryUpdateOutput, projectId),
+    optimize_product: () => mapOptimizeProductActions(output as OptimizeProductOutput, projectId),
+    analyze_signals: () => mapAnalyzeSignalsActions(output as AnalyzeSignalsOutput, projectId),
   };
+
 
   let actions = mappers[workflowId]();
 
@@ -230,3 +241,135 @@ function mapWeeklyReviewActions(output: WeeklyReviewOutput): SaveAction[] {
 
   return actions;
 }
+
+function mapValidateIdeaActions(output: ValidateIdeaOutput, workspaceId?: string): SaveAction[] {
+  return [
+    {
+      key: "advance_stage_validation",
+      label: "Update Lifecycle Stage (Spec)",
+      collection: "workspaces",
+      payload: {
+        id: workspaceId ?? "",
+        stage: "spec",
+      },
+    },
+    {
+      key: "create_task_validation",
+      label: "Create User Interview Task",
+      collection: "tasks",
+      payload: {
+        title: "Conduct 5 user interviews",
+        type: "research",
+        priority: "medium",
+        description: "Draft interview guide and interview 5 developers on how they prioritize tasks daily.",
+        workspaceId: workspaceId ?? "",
+      },
+    },
+  ];
+}
+
+function mapLaunchPrepActions(output: LaunchPrepOutput, workspaceId?: string): SaveAction[] {
+  return [
+    {
+      key: "advance_stage_launch",
+      label: "Update Lifecycle Stage (Growth)",
+      collection: "workspaces",
+      payload: {
+        id: workspaceId ?? "",
+        stage: "growth",
+      },
+    },
+    {
+      key: "create_task_launch",
+      label: "Create Deployment Task",
+      collection: "tasks",
+      payload: {
+        title: "Deploy production build on Vercel",
+        type: "chore",
+        priority: "high",
+        description: "Deploy to production, configure custom domain, and bind environment variables.",
+        workspaceId: workspaceId ?? "",
+      },
+    },
+  ];
+}
+
+function mapDeliveryUpdateActions(output: DeliveryUpdateOutput, workspaceId?: string): SaveAction[] {
+  return [
+    {
+      key: "save_decision_delivery",
+      label: "Save Handoff Decision",
+      collection: "decisions",
+      payload: {
+        title: "Approve Client Phase 2 Milestones",
+        context: "Client review session on May 31",
+        chosenOption: "Approved & Handoff completed",
+        rationale: output.sprintStatusSummary,
+        optionsConsidered: ["Approve with minor fixes", "Full delay for minor changes"],
+        tradeoffs: "Closing sprint early frees capacity, but minor CSS fixes will need post-launch chore logging.",
+        workspaceId: workspaceId ?? "",
+      },
+    },
+  ];
+}
+
+function mapOptimizeProductActions(output: OptimizeProductOutput, workspaceId?: string): SaveAction[] {
+  return [
+    {
+      key: "create_opp_improvement",
+      label: "Create Bundle Opportunity",
+      collection: "opportunities",
+      payload: {
+        title: "Optimize Landing Page Bundle Sizing",
+        description: output.optimizationCandidates[0] ?? "Compress landing page bundle size.",
+        category: "performance",
+        score: 60,
+        scoringBreakdown: {
+          impact: 4,
+          confidence: 3,
+          effort: 2,
+          explanation: "Priority score of 60/100 calculated from: High Impact (4), Medium Confidence (3), and Low Effort (2).",
+        },
+        sourceSignalIds: [],
+        workspaceId: workspaceId ?? "",
+      },
+    },
+  ];
+}
+
+function mapAnalyzeSignalsActions(output: AnalyzeSignalsOutput, workspaceId?: string): SaveAction[] {
+  return [
+    {
+      key: "create_signal_analyst",
+      label: "Create Memory Signal",
+      collection: "signals",
+      payload: {
+        title: "High memory usage in render loop",
+        description: output.triageReport,
+        category: "performance",
+        severity: "high",
+        source: "posthog",
+        workspaceId: workspaceId ?? "",
+      },
+    },
+    {
+      key: "save_playbook_analyst",
+      label: "Save Triage Playbook",
+      collection: "playbooks",
+      payload: {
+        title: "Memory Heap Triage Guide",
+        category: "telemetry",
+        summary: "Step-by-step debug flow for memory leak issues.",
+        steps: [
+          "Open Chrome DevTools Performance Profiler",
+          "Identify garbage collection memory retainers",
+          "Check clean-up triggers in useEffect dependencies",
+        ],
+        checklist: ["Check event listeners", "Verify timer disposal"],
+        promptTemplate: "Analyze the following heap snapshot trace to find leaks...",
+        workspaceId: workspaceId ?? "",
+      },
+    },
+  ];
+}
+

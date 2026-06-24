@@ -10,6 +10,8 @@ export type { RunAgentWorkflowParams } from "./run-agent-workflow";
 // Types
 export type {
   V1WorkflowId,
+  V1_1WorkflowId,
+  AllWorkflowId,
   WorkflowDefinition,
   AgentContext,
   ModelAdapter,

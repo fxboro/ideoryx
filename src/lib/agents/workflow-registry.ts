@@ -4,9 +4,9 @@
 // corresponding WorkflowType enum value for persistence.
 // ─────────────────────────────────────────────────────────────
 
-import type { WorkflowDefinition, V1WorkflowId } from "./types";
+import type { WorkflowDefinition, AllWorkflowId } from "./types";
 
-export const WORKFLOW_REGISTRY: Record<V1WorkflowId, WorkflowDefinition> = {
+export const WORKFLOW_REGISTRY: Record<AllWorkflowId, WorkflowDefinition> = {
   idea_to_mvp: {
     id: "idea_to_mvp",
     agentRole: "founder",
@@ -42,9 +42,44 @@ export const WORKFLOW_REGISTRY: Record<V1WorkflowId, WorkflowDefinition> = {
     label: "Weekly Review",
     description: "Summarise the past week, surface blockers, extract learnings, and plan priorities for next week.",
   },
+  validate_idea: {
+    id: "validate_idea",
+    agentRole: "founder",
+    workflowType: "validate_idea",
+    label: "Validate Product Idea",
+    description: "Analyze market positioning, target personas, and validation metrics.",
+  },
+  launch_prep: {
+    id: "launch_prep",
+    agentRole: "builder",
+    workflowType: "launch_prep",
+    label: "Product Launch Prep",
+    description: "Generate pre-launch safety checklists and multi-channel launch checklists.",
+  },
+  delivery_update: {
+    id: "delivery_update",
+    agentRole: "freelance",
+    workflowType: "delivery_update",
+    label: "Client Delivery Update",
+    description: "Generate client-friendly progress updates and document changes.",
+  },
+  optimize_product: {
+    id: "optimize_product",
+    agentRole: "builder",
+    workflowType: "optimize_product",
+    label: "Identify Product Improvements",
+    description: "Structure performance, cost, and quality candidate improvements.",
+  },
+  analyze_signals: {
+    id: "analyze_signals",
+    agentRole: "execution",
+    workflowType: "analyze_signals",
+    label: "Analyze Telemetry Signals",
+    description: "Scans active logs and recommends resolutions or conversion candidates.",
+  },
 };
 
-export function getWorkflowDefinition(id: V1WorkflowId): WorkflowDefinition {
+export function getWorkflowDefinition(id: AllWorkflowId): WorkflowDefinition {
   const def = WORKFLOW_REGISTRY[id];
   if (!def) {
     throw new Error(`Unknown workflow: ${id}`);
@@ -52,6 +87,7 @@ export function getWorkflowDefinition(id: V1WorkflowId): WorkflowDefinition {
   return def;
 }
 
-export function isV1WorkflowId(value: string): value is V1WorkflowId {
+export function isV1WorkflowId(value: string): value is AllWorkflowId {
   return value in WORKFLOW_REGISTRY;
 }
+

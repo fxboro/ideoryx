@@ -14,7 +14,7 @@
 
 import { randomUUID } from "crypto";
 
-import type { AgentWorkflowResult, V1WorkflowId, WorkflowOutput, ModelAdapter } from "./types";
+import type { AgentWorkflowResult, AllWorkflowId, WorkflowOutput, ModelAdapter } from "./types";
 import { runAgentWorkflowRequestSchema } from "@/lib/validators";
 import { buildAgentContext } from "./context-builder";
 import { resolvePromptTemplate } from "./prompt-templates";
@@ -35,7 +35,7 @@ export interface RunAgentWorkflowParams {
   modelAdapter?: ModelAdapter;
 
   /** Optional: override the workflow ID (otherwise inferred from request). */
-  workflowId?: V1WorkflowId;
+  workflowId?: AllWorkflowId;
 }
 
 /**
@@ -106,8 +106,9 @@ export async function runAgentWorkflow(params: RunAgentWorkflowParams): Promise<
     const saveActions = mapSaveActions(
       workflowId,
       output,
-      request.projectId,
-      request.leadId
+      request.projectId || request.workspaceId,
+      request.leadId,
+      agentRunId
     );
 
     // ── Step 8: Determine Next Best Action ─────────────────────
@@ -160,8 +161,8 @@ function buildErrorResult(agentRunId: string, startTime: number, error: string):
  * Infers a default workflow from the agent role.
  * Used when the caller doesn't explicitly specify a workflowId.
  */
-function inferWorkflowId(agentRole: string): V1WorkflowId {
-  const roleToWorkflow: Record<string, V1WorkflowId> = {
+function inferWorkflowId(agentRole: string): AllWorkflowId {
+  const roleToWorkflow: Record<string, AllWorkflowId> = {
     founder: "idea_to_mvp",
     architect: "mvp_to_technical_plan",
     builder: "feature_to_build_plan",
@@ -169,6 +170,11 @@ function inferWorkflowId(agentRole: string): V1WorkflowId {
     execution: "weekly_review",
     reviewer: "weekly_review",
     learning: "weekly_review",
+    validation: "validate_idea",
+    launch: "launch_prep",
+    delivery: "delivery_update",
+    improvement: "optimize_product",
+    signal_analyst: "analyze_signals",
   };
 
   return roleToWorkflow[agentRole] ?? "weekly_review";
@@ -178,7 +184,7 @@ function inferWorkflowId(agentRole: string): V1WorkflowId {
  * Derives a human-readable next-best-action string
  * based on the workflow type and its output.
  */
-function deriveNextBestAction(workflowId: V1WorkflowId, output: WorkflowOutput): string {
+function deriveNextBestAction(workflowId: AllWorkflowId, output: WorkflowOutput): string {
   switch (workflowId) {
     case "idea_to_mvp": {
       const o = output as { nextSteps?: string[] };
@@ -199,6 +205,21 @@ function deriveNextBestAction(workflowId: V1WorkflowId, output: WorkflowOutput):
       const o = output as { nextWeekPriorities?: string[] };
       return o.nextWeekPriorities?.[0] ?? "Set your priorities for next week.";
     }
+    case "validate_idea": {
+      return "Draft MVP Specification.";
+    }
+    case "launch_prep": {
+      return "Deploy & Advance to Growth.";
+    }
+    case "delivery_update": {
+      return "Log Client Approval.";
+    }
+    case "optimize_product": {
+      return "Create Growth Opportunity.";
+    }
+    case "analyze_signals": {
+      return "Create Severity Signal.";
+    }
     default:
       return "Review the output and take the next step.";
   }
@@ -210,7 +231,7 @@ interface PersistParams {
   agentRunId: string;
   userId: string;
   definition: { agentRole: string; workflowType: string };
-  request: { inputGoal: string; projectId?: string; leadId?: string; contextTags?: string[] };
+  request: { inputGoal: string; projectId?: string; workspaceId?: string; leadId?: string; contextTags?: string[] };
   output: Record<string, unknown>;
   status: "completed" | "failed";
   durationMs: number;
@@ -224,6 +245,7 @@ async function persistAgentRun(p: PersistParams): Promise<void> {
       agentRole: p.definition.agentRole as import("@/types").AgentRole,
       workflowType: p.definition.workflowType as import("@/types").WorkflowType,
       projectId: p.request.projectId,
+      workspaceId: p.request.workspaceId,
       leadId: p.request.leadId,
       inputGoal: p.request.inputGoal,
       contextTags: p.request.contextTags ?? [],

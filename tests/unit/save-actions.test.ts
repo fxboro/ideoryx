@@ -148,4 +148,60 @@ describe("Save Actions Mapper Unit Tests", () => {
       expect(memoryAction?.payload.content).toBe("Vitest configuration was easy");
     });
   });
+
+  describe("V1.1 Workflow Save Actions", () => {
+    it("should generate save actions for validate_idea", () => {
+      const output = {
+        validationSummary: "Validated target user.",
+        channels: ["HN", "Reddit"],
+      };
+      const actions = mapSaveActions("validate_idea", output, "workspace-123");
+      expect(actions.length).toBe(2);
+      expect(actions.find(a => a.key === "advance_stage_validation")?.payload.stage).toBe("spec");
+      expect(actions.find(a => a.key === "create_task_validation")?.payload.workspaceId).toBe("workspace-123");
+    });
+
+    it("should generate save actions for launch_prep", () => {
+      const output = {
+        launchChecklist: ["Verify configs"],
+      };
+      const actions = mapSaveActions("launch_prep", output, "workspace-123");
+      expect(actions.length).toBe(2);
+      expect(actions.find(a => a.key === "advance_stage_launch")?.payload.stage).toBe("growth");
+      expect(actions.find(a => a.key === "create_task_launch")?.payload.workspaceId).toBe("workspace-123");
+    });
+
+    it("should generate save actions for delivery_update", () => {
+      const output = {
+        sprintStatusSummary: "Phase 2 approved.",
+      };
+      const actions = mapSaveActions("delivery_update", output, "workspace-123");
+      expect(actions.length).toBe(1);
+      expect(actions[0].key).toBe("save_decision_delivery");
+      expect(actions[0].payload.workspaceId).toBe("workspace-123");
+      expect(actions[0].payload.rationale).toBe("Phase 2 approved.");
+    });
+
+    it("should generate save actions for optimize_product", () => {
+      const output = {
+        optimizationCandidates: ["Reduce bundle size to 300KB"],
+      };
+      const actions = mapSaveActions("optimize_product", output, "workspace-123");
+      expect(actions.length).toBe(1);
+      expect(actions[0].key).toBe("create_opp_improvement");
+      expect(actions[0].payload.workspaceId).toBe("workspace-123");
+      expect(actions[0].payload.description).toBe("Reduce bundle size to 300KB");
+    });
+
+    it("should generate save actions for analyze_signals", () => {
+      const output = {
+        triageReport: "Layout trace issues.",
+      };
+      const actions = mapSaveActions("analyze_signals", output, "workspace-123");
+      expect(actions.length).toBe(2);
+      expect(actions.find(a => a.key === "create_signal_analyst")?.payload.workspaceId).toBe("workspace-123");
+      expect(actions.find(a => a.key === "save_playbook_analyst")?.payload.workspaceId).toBe("workspace-123");
+    });
+  });
 });
+

@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { z } from "zod";
-import type { V1WorkflowId } from "./types";
+import type { AllWorkflowId } from "./types";
 
 // ── Per-Workflow Output Schemas ──────────────────────────────
 
@@ -88,19 +88,46 @@ export const weeklyReviewOutputSchema = z.object({
   learningTarget: z.string(),
 });
 
+export const validateIdeaOutputSchema = z.object({
+  validationSummary: z.string(),
+  channels: z.array(z.string()),
+});
+
+export const launchPrepOutputSchema = z.object({
+  launchChecklist: z.array(z.string()),
+});
+
+export const deliveryUpdateOutputSchema = z.object({
+  sprintStatusSummary: z.string(),
+});
+
+export const optimizeProductOutputSchema = z.object({
+  optimizationCandidates: z.array(z.string()),
+});
+
+export const analyzeSignalsOutputSchema = z.object({
+  triageReport: z.string(),
+});
+
 // ── Schema Registry ──────────────────────────────────────────
 
-const OUTPUT_SCHEMAS: Record<V1WorkflowId, z.ZodSchema> = {
+const OUTPUT_SCHEMAS: Record<AllWorkflowId, z.ZodSchema> = {
   idea_to_mvp: ideaToMvpOutputSchema,
   mvp_to_technical_plan: mvpToTechnicalPlanOutputSchema,
   feature_to_build_plan: featureToBuildPlanOutputSchema,
   lead_to_proposal: leadToProposalOutputSchema,
   weekly_review: weeklyReviewOutputSchema,
+  validate_idea: validateIdeaOutputSchema,
+  launch_prep: launchPrepOutputSchema,
+  delivery_update: deliveryUpdateOutputSchema,
+  optimize_product: optimizeProductOutputSchema,
+  analyze_signals: analyzeSignalsOutputSchema,
 };
 
-export function getOutputSchema(workflowId: V1WorkflowId): z.ZodSchema {
+export function getOutputSchema(workflowId: AllWorkflowId): z.ZodSchema {
   return OUTPUT_SCHEMAS[workflowId];
 }
+
 
 // ── Validation Function ──────────────────────────────────────
 
@@ -114,7 +141,7 @@ export interface ValidationResult {
  * Validates the raw model output against the workflow's expected schema.
  * Attempts to parse JSON from the raw string first, then validates the shape.
  */
-export function validateOutput(workflowId: V1WorkflowId, raw: string): ValidationResult {
+export function validateOutput(workflowId: AllWorkflowId, raw: string): ValidationResult {
   const schema = getOutputSchema(workflowId);
 
   // Step 1: Parse JSON from the raw response

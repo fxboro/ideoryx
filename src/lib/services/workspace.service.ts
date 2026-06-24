@@ -72,7 +72,13 @@ export class WorkspaceService extends BaseService<WorkspaceSchemaType> {
     super("workspaces", workspaceSchema);
   }
 
-  async createWorkspace(id: string, data: Omit<Workspace, "id" | "createdAt" | "updatedAt">): Promise<void> {
+  async createWorkspace(
+    id: string,
+    data: Omit<Workspace, "id" | "createdAt" | "updatedAt" | "checklists" | "readinessScore"> & {
+      checklists?: Record<string, WorkspaceChecklistItem[]>;
+      readinessScore?: number;
+    }
+  ): Promise<void> {
     const defaultChecklists = data.workspaceType === "product"
       ? DEFAULT_PRODUCT_CHECKLISTS
       : DEFAULT_CLIENT_CHECKLISTS;

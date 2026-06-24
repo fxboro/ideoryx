@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import type { AgentContext } from "./types";
-import type { V1WorkflowId } from "./types";
+import type { AllWorkflowId } from "./types";
 
 interface PromptPair {
   systemPrompt: string;
@@ -16,13 +16,18 @@ interface PromptPair {
  * Each workflow gets a tailored system persona and structured
  * output instruction, plus a user prompt assembled from context.
  */
-export function resolvePromptTemplate(workflowId: V1WorkflowId, context: AgentContext): PromptPair {
-  const resolvers: Record<V1WorkflowId, (ctx: AgentContext) => PromptPair> = {
+export function resolvePromptTemplate(workflowId: AllWorkflowId, context: AgentContext): PromptPair {
+  const resolvers: Record<AllWorkflowId, (ctx: AgentContext) => PromptPair> = {
     idea_to_mvp: buildIdeaToMvpPrompt,
     mvp_to_technical_plan: buildMvpToTechnicalPlanPrompt,
     feature_to_build_plan: buildFeatureToBuildPlanPrompt,
     lead_to_proposal: buildLeadToProposalPrompt,
     weekly_review: buildWeeklyReviewPrompt,
+    validate_idea: buildValidateIdeaPrompt,
+    launch_prep: buildLaunchPrepPrompt,
+    delivery_update: buildDeliveryUpdatePrompt,
+    optimize_product: buildOptimizeProductPrompt,
+    analyze_signals: buildAnalyzeSignalsPrompt,
   };
 
   return resolvers[workflowId](context);
@@ -289,3 +294,172 @@ ${formatMemories(ctx)}
 ${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
   };
 }
+
+function formatWorkspace(context: AgentContext): string {
+  if (!context.workspace) return "No workspace context provided.";
+  const w = context.workspace;
+  
+  let checklistsText = "";
+  if (w.checklists && typeof w.checklists === "object") {
+    checklistsText = Object.entries(w.checklists)
+      .map(([stageName, items]) => {
+        const itemsText = items
+          .map((item) => `  - [${item.completed ? "x" : " "}] ${item.label}`)
+          .join("\n");
+        return `### Stage: ${stageName}\n${itemsText}`;
+      })
+      .join("\n\n");
+  } else {
+    checklistsText = "No checklists defined.";
+  }
+
+  return [
+    `Workspace: ${w.name}`,
+    `Type: ${w.workspaceType} | Stage: ${w.stage} | Status: ${w.status}`,
+    `Summary: ${w.summary}`,
+    w.stack?.length ? `Stack: ${w.stack.join(", ")}` : null,
+    w.currentFocus ? `Current Focus: ${w.currentFocus}` : null,
+    w.nextMilestone ? `Next Milestone: ${w.nextMilestone}` : null,
+    `Readiness Score: ${w.readinessScore}%`,
+    `Risk Level: ${w.risk}`,
+    `\n## Stage Checklists:\n${checklistsText}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function formatSignals(context: AgentContext): string {
+  if (!context.signals || context.signals.length === 0) return "No telemetry signals available.";
+  return context.signals
+    .map((s) => `- [${s.category}] [Severity: ${s.severity}] [Status: ${s.status}] ${s.title}: ${s.description} (Source: ${s.source})`)
+    .join("\n");
+}
+
+function buildValidateIdeaPrompt(ctx: AgentContext): PromptPair {
+  return {
+    systemPrompt: `You are a market validation specialist.
+Your job is to analyze a product idea or client workspace and evaluate its market validation.
+Focus on identifying the target customer profile (ICP), defining acquisition channels, and highlighting validation metrics.
+
+${JSON_INSTRUCTION}
+
+Respond with this exact JSON structure:
+{
+  "validationSummary": "string",
+  "channels": ["string"]
+}`,
+    userPrompt: `## Input Goal
+${ctx.inputGoal}
+
+## Workspace Context
+${formatWorkspace(ctx)}
+
+## User Memories & Preferences
+${formatMemories(ctx)}
+
+${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
+  };
+}
+
+function buildLaunchPrepPrompt(ctx: AgentContext): PromptPair {
+  return {
+    systemPrompt: `You are a release coordinator and launch specialist.
+Your job is to prepare release checklists, monitoring setup, and launch details to transition a workspace from build to launch.
+
+${JSON_INSTRUCTION}
+
+Respond with this exact JSON structure:
+{
+  "launchChecklist": ["string"]
+}`,
+    userPrompt: `## Input Goal
+${ctx.inputGoal}
+
+## Workspace Context
+${formatWorkspace(ctx)}
+
+## User Memories & Preferences
+${formatMemories(ctx)}
+
+${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
+  };
+}
+
+function buildDeliveryUpdatePrompt(ctx: AgentContext): PromptPair {
+  return {
+    systemPrompt: `You are a project manager and client communications specialist.
+Your job is to compile a client-ready delivery report summarizing sprint status, progress reviews, and changelogs.
+
+${JSON_INSTRUCTION}
+
+Respond with this exact JSON structure:
+{
+  "sprintStatusSummary": "string"
+}`,
+    userPrompt: `## Input Goal
+${ctx.inputGoal}
+
+## Workspace Context
+${formatWorkspace(ctx)}
+
+## User Memories & Preferences
+${formatMemories(ctx)}
+
+${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
+  };
+}
+
+function buildOptimizeProductPrompt(ctx: AgentContext): PromptPair {
+  return {
+    systemPrompt: `You are a product optimization engineer and UX specialist.
+Your job is to identify product improvement opportunities (performance, cost, security, quality, growth).
+
+${JSON_INSTRUCTION}
+
+Respond with this exact JSON structure:
+{
+  "optimizationCandidates": ["string"]
+}`,
+    userPrompt: `## Input Goal
+${ctx.inputGoal}
+
+## Workspace Context
+${formatWorkspace(ctx)}
+
+## Telemetry Signals
+${formatSignals(ctx)}
+
+## User Memories & Preferences
+${formatMemories(ctx)}
+
+${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
+  };
+}
+
+function buildAnalyzeSignalsPrompt(ctx: AgentContext): PromptPair {
+  return {
+    systemPrompt: `You are a telemetry analyst and reliability engineer.
+Your job is to scan error logs, user feedback, and tickets to compile a triage report.
+
+${JSON_INSTRUCTION}
+
+Respond with this exact JSON structure:
+{
+  "triageReport": "string"
+}`,
+    userPrompt: `## Input Goal
+${ctx.inputGoal}
+
+## Workspace Context
+${formatWorkspace(ctx)}
+
+## Telemetry Signals
+${formatSignals(ctx)}
+
+## User Memories & Preferences
+${formatMemories(ctx)}
+
+${ctx.additionalContext ? `## Additional Context\n${ctx.additionalContext}` : ""}`,
+  };
+}
+

@@ -4,11 +4,12 @@
 // loading relevant data from Firestore services.
 // ─────────────────────────────────────────────────────────────
 
-import type { V1WorkflowId } from "./types";
+import type { AllWorkflowId } from "./types";
 import type { AgentContext } from "./types";
 import type { RunAgentWorkflowRequest } from "@/lib/validators";
 import { loadMemories } from "./memory-loader";
 import { loadProjectContext } from "./project-context-loader";
+import { loadWorkspaceContext } from "./workspace-context-loader";
 import { goalService } from "@/lib/services/goal.service";
 import { leadService } from "@/lib/services/lead.service";
 import { taskService } from "@/lib/services/task.service";
@@ -20,12 +21,12 @@ import { getWorkflowDefinition } from "./workflow-registry";
 export interface ContextBuilderParams {
   userId: string;
   request: RunAgentWorkflowRequest;
-  workflowId: V1WorkflowId;
+  workflowId: AllWorkflowId;
 }
 
 /**
  * Builds the complete AgentContext for a given workflow run.
- * Loads memories, project data, goals, and lead data in parallel
+ * Loads memories, project data, workspace data, goals, and lead data in parallel
  * based on what the workflow actually needs.
  */
 export async function buildAgentContext(params: ContextBuilderParams): Promise<AgentContext> {
@@ -34,17 +35,21 @@ export async function buildAgentContext(params: ContextBuilderParams): Promise<A
 
   // Determine what to load based on workflow needs
   const needsProject = !!request.projectId;
+  const needsWorkspace = !!request.workspaceId;
   const needsLead = !!request.leadId || definition.agentRole === "freelance";
   const contextTags = request.contextTags ?? [];
 
   const isWeeklyReview = workflowId === "weekly_review";
 
   // Load everything in parallel for speed
-  const [memories, projectCtx, goals, lead, allTasks, decisions, agentRuns, learningItems] = await Promise.all([
+  const [memories, projectCtx, workspaceCtx, goals, lead, allTasks, decisions, agentRuns, learningItems] = await Promise.all([
     loadMemories(userId, contextTags),
     needsProject && request.projectId
       ? loadProjectContext(request.projectId)
       : Promise.resolve({ project: null, tasks: [] }),
+    needsWorkspace && request.workspaceId
+      ? loadWorkspaceContext(request.workspaceId)
+      : Promise.resolve({ workspace: null, tasks: [], signals: [] }),
     goalService.listByUser(userId),
     needsLead && request.leadId
       ? leadService.getById(request.leadId)
@@ -55,12 +60,22 @@ export async function buildAgentContext(params: ContextBuilderParams): Promise<A
     isWeeklyReview ? learningItemService.listByUser(userId) : Promise.resolve([]),
   ]);
 
+  // Combine tasks from either project, workspace, or weekly review
+  let tasks = projectCtx.tasks;
+  if (isWeeklyReview) {
+    tasks = allTasks;
+  } else if (needsWorkspace) {
+    tasks = workspaceCtx.tasks;
+  }
+
   return {
     inputGoal: request.inputGoal,
     memories,
     project: projectCtx.project,
+    workspace: workspaceCtx.workspace,
+    signals: workspaceCtx.signals,
     goals,
-    tasks: isWeeklyReview ? allTasks : projectCtx.tasks,
+    tasks,
     lead,
     decisions,
     agentRuns,

@@ -13,6 +13,14 @@ export class TaskService extends BaseService<TaskSchemaType> {
       .get();
     return snapshot.docs.map((doc) => doc.data() as TaskSchemaType);
   }
+
+  async getWorkspaceTasks(workspaceId: string): Promise<TaskSchemaType[]> {
+    const snapshot = await this.collection
+      .where("workspaceId", "==", workspaceId)
+      .orderBy("createdAt", "desc")
+      .get();
+    return snapshot.docs.map((doc) => doc.data() as TaskSchemaType);
+  }
 }
 
 export const taskService = new TaskService();

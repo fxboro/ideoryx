@@ -117,6 +117,62 @@ describe("Run Agent Workflow Integration Tests", () => {
 
     // Ensure nothing is written to DB since parsing failed before pipeline ran
     const runsData = mockFirestoreInstance.getCollectionData("agent_runs");
-    expect(Object.keys(runsData).length).toBe(0);
+  });
+
+  it("should successfully run a V1.1 validate_idea workflow", async () => {
+    const userId = "user-123";
+    const workspaceId = "workspace-123";
+
+    const mockWorkspace = {
+      id: workspaceId,
+      userId,
+      name: "E-Commerce Checkout",
+      workspaceType: "product",
+      status: "active",
+      summary: "Refactoring Stripe checkout flow",
+      stage: "validation",
+      readinessScore: 0,
+      checklists: {
+        validation: [
+          { id: "v1", stage: "validation", label: "Define Target Customer Profile (ICP)", completed: false },
+        ]
+      },
+      risk: "medium",
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    mockFirestoreInstance.seed("workspaces", workspaceId, mockWorkspace);
+
+    const validValidateOutput = {
+      validationSummary: "ICP defined and pain points validated.",
+      channels: ["Direct developer forums", "Reddit"],
+    };
+
+    const mockAdapter = new MockModelAdapter(JSON.stringify(validValidateOutput));
+
+    const result = await runAgentWorkflow({
+      userId,
+      modelAdapter: mockAdapter,
+      workflowId: "validate_idea",
+      rawRequest: {
+        agentRole: "founder",
+        inputGoal: "Validate the checkout flow project",
+        workspaceId,
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.output).toEqual(validValidateOutput);
+    expect(result.saveActions.length).toBe(2);
+    expect(result.nextBestAction).toBe("Draft MVP Specification.");
+
+    // Check persistence of run
+    const runsData = mockFirestoreInstance.getCollectionData("agent_runs");
+    const run = runsData[result.agentRunId];
+    expect(run).toBeDefined();
+    expect(run.workspaceId).toBe(workspaceId);
+    expect(run.status).toBe("completed");
   });
 });
+

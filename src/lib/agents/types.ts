@@ -4,7 +4,7 @@
 
 import type { z } from "zod";
 import type { AgentRole, WorkflowType } from "@/types";
-import type { ProjectSchemaType, GoalSchemaType, TaskSchemaType, LeadSchemaType, MemorySchemaType, DecisionSchemaType, AgentRunSchemaType, LearningItemSchemaType } from "@/lib/validators";
+import type { ProjectSchemaType, GoalSchemaType, TaskSchemaType, LeadSchemaType, MemorySchemaType, DecisionSchemaType, AgentRunSchemaType, LearningItemSchemaType, WorkspaceSchemaType, SignalSchemaType } from "@/lib/validators";
 
 // ── Workflow Definitions ─────────────────────────────────────
 
@@ -20,11 +20,26 @@ export type V1WorkflowId =
   | "weekly_review";
 
 /**
+ * The five new V1.1 workflow IDs.
+ */
+export type V1_1WorkflowId =
+  | "validate_idea"
+  | "launch_prep"
+  | "delivery_update"
+  | "optimize_product"
+  | "analyze_signals";
+
+/**
+ * Combined union of all workflow IDs.
+ */
+export type AllWorkflowId = V1WorkflowId | V1_1WorkflowId;
+
+/**
  * Maps each named workflow to the agent role that owns it
  * and the existing WorkflowType enum value for persistence.
  */
 export interface WorkflowDefinition {
-  id: V1WorkflowId;
+  id: AllWorkflowId;
   agentRole: AgentRole;
   workflowType: WorkflowType;
   label: string;
@@ -43,6 +58,12 @@ export interface AgentContext {
 
   /** The project being worked on (if any). */
   project: ProjectSchemaType | null;
+
+  /** The workspace being worked on (for V1.1 workflows). */
+  workspace: WorkspaceSchemaType | null;
+
+  /** Telemetry signals relevant to this run. */
+  signals?: SignalSchemaType[];
 
   /** Active goals relevant to the workflow. */
   goals: GoalSchemaType[];
@@ -172,13 +193,44 @@ export interface WeeklyReviewOutput {
   learningTarget: string;
 }
 
+/** validate_idea: takes idea and maps personas / channels */
+export interface ValidateIdeaOutput {
+  validationSummary: string;
+  channels: string[];
+}
+
+/** launch_prep: generates release & monitoring checklist */
+export interface LaunchPrepOutput {
+  launchChecklist: string[];
+}
+
+/** delivery_update: compiles status summaries and changelogs */
+export interface DeliveryUpdateOutput {
+  sprintStatusSummary: string;
+}
+
+/** optimize_product: logs UX/monetization opportunities */
+export interface OptimizeProductOutput {
+  optimizationCandidates: string[];
+}
+
+/** analyze_signals: triages logs & feedback */
+export interface AnalyzeSignalsOutput {
+  triageReport: string;
+}
+
 /** Union of all structured outputs. */
 export type WorkflowOutput =
   | IdeaToMvpOutput
   | MvpToTechnicalPlanOutput
   | FeatureToBuildPlanOutput
   | LeadToProposalOutput
-  | WeeklyReviewOutput;
+  | WeeklyReviewOutput
+  | ValidateIdeaOutput
+  | LaunchPrepOutput
+  | DeliveryUpdateOutput
+  | OptimizeProductOutput
+  | AnalyzeSignalsOutput;
 
 // ── Orchestrator Result ──────────────────────────────────────
 

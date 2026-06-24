@@ -83,4 +83,53 @@ describe("Output Validator Unit Tests", () => {
       expect(result.error).toContain("overallMomentum");
     });
   });
+
+  describe("V1.1 Workflow Output Validation", () => {
+    it("should validate a valid validate_idea output", () => {
+      const raw = JSON.stringify({
+        validationSummary: "Solo developers validated.",
+        channels: ["Forums", "Socials"],
+      });
+      const result = validateOutput("validate_idea", raw);
+      expect(result.success).toBe(true);
+      expect(result.data?.validationSummary).toBe("Solo developers validated.");
+    });
+
+    it("should validate a valid launch_prep output", () => {
+      const raw = JSON.stringify({
+        launchChecklist: ["Verify certificates", "Stress test connection"],
+      });
+      const result = validateOutput("launch_prep", raw);
+      expect(result.success).toBe(true);
+      expect(result.data?.launchChecklist).toEqual(["Verify certificates", "Stress test connection"]);
+    });
+
+    it("should validate a valid delivery_update output", () => {
+      const raw = JSON.stringify({
+        sprintStatusSummary: "Phase 2 done.",
+      });
+      const result = validateOutput("delivery_update", raw);
+      expect(result.success).toBe(true);
+      expect(result.data?.sprintStatusSummary).toBe("Phase 2 done.");
+    });
+
+    it("should validate a valid optimize_product output", () => {
+      const raw = JSON.stringify({
+        optimizationCandidates: ["Reduce bundle size", "Clean effect hooks"],
+      });
+      const result = validateOutput("optimize_product", raw);
+      expect(result.success).toBe(true);
+      expect(result.data?.optimizationCandidates).toEqual(["Reduce bundle size", "Clean effect hooks"]);
+    });
+
+    it("should validate a valid analyze_signals output", () => {
+      const raw = JSON.stringify({
+        triageReport: "Layout memory leak.",
+      });
+      const result = validateOutput("analyze_signals", raw);
+      expect(result.success).toBe(true);
+      expect(result.data?.triageReport).toBe("Layout memory leak.");
+    });
+  });
 });
+

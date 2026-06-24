@@ -15,8 +15,10 @@ This document tracks all defects, inconsistencies, and design deviations identif
 | Issue ID | Severity | Component | Status | Description | Code Reference |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **BUG-001** | 🟡 Medium | Types (Domain) | 🔵 Verified | `BaseEntity` is missing the `organizationId?: string` field required for SaaS tenant partitioning. It is currently defined inside `Workspace` only. | [domain.ts:L47](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/types/domain.ts#L47-L53) |
-| **BUG-002** | 🟡 Medium | Firestore Config | 🟢 Resolved | Missing composite indexes for `signals` and `opportunities` queries in `firestore.indexes.json`. | [firestore.indexes.json](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.indexes.json) |
+| **BUG-002** | 🟡 Medium | Firestore Config | 🔵 Verified | Missing composite indexes for `signals` and `opportunities` queries in `firestore.indexes.json`. | [firestore.indexes.json](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.indexes.json) |
 | **BUG-003** | 🟡 Medium | Firestore Rules | 🔵 Verified | The `signals` and `opportunities` collections are missing from the `firestore.rules` whitelist collections array. | [firestore.rules:L49](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) |
+| **BUG-004** | 🔴 High | Agent Orchestration (Prompts) | 🔵 Verified | `formatWorkspace` helper is missing, and prompt templates/resolvers for the 5 new V1.1 workflows (`validate_idea`, `launch_prep`, `delivery_update`, `optimize_product`, `analyze_signals`) are not implemented. | [prompt-templates.ts:L19](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/lib/agents/prompt-templates.ts#L19-L30) |
+
 
 ---
 
@@ -62,3 +64,20 @@ This document tracks all defects, inconsistencies, and design deviations identif
 *   **Resolution Details**:
     *   **Status**: 🔵 Verified by QA.
     *   **Details**: Added `'signals'` and `'opportunities'` to the whitelist arrays in [firestore.rules](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) for `read, delete`, `create`, and `update` matches. Verified that compilation is successful and all tests pass cleanly.
+
+### BUG-004: Missing `formatWorkspace` helper and prompts for the 5 new V1.1 workflows
+*   **Severity**: 🔴 High
+*   **Impact**: Completely blocks prompt compilation and model invocation for the 5 new workflows introduced in V1.1: `validate_idea`, `launch_prep`, `delivery_update`, `optimize_product`, and `analyze_signals`.
+*   **Steps to Reproduce**:
+    1. Inspect `src/lib/agents/prompt-templates.ts`.
+    2. Note that `resolvePromptTemplate` only maps V1 workflows and does not support the 5 new ones.
+    3. Note that `formatWorkspace` helper is not defined to format workspace context fields.
+*   **Recommended Resolution**:
+    *   Widen orchestrator workflow ID types to include the 5 new workflows.
+    *   Implement `formatWorkspace` helper function to extract stage, readiness, checklists, stack, etc.
+    *   Implement prompt builders for the 5 new workflows and map them in `resolvePromptTemplate`.
+*   **Resolution Details**:
+    *   **Status**: 🔵 Verified by QA.
+    *   **Details**: Widened the `V1WorkflowId` type to `AllWorkflowId` to support both V1 and V1.1 workflows across the registry, prompt builders, validators, and save action mappers. Implemented `formatWorkspace` and `formatSignals` helper context formatters, and added all 5 prompt template builder configurations. Added new unit and integration tests covering the V1.1 workflows (validation, launch, delivery, optimize, signals) in Vitest, and verified successful compilation (`npx tsc --noEmit`) and 100% test passes.
+
+
