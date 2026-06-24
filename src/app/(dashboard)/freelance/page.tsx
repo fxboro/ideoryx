@@ -6,21 +6,24 @@ import { Plus } from "lucide-react"
 import { PipelineSummary } from "./_components/pipeline-summary"
 import { LeadTable } from "./_components/lead-table"
 import { LeadDetailDrawer } from "./_components/lead-detail-drawer"
+import { CreateLeadDialog } from "./_components/create-lead-dialog"
 import { ServiceTemplatesGrid } from "./_components/service-templates-grid"
 import { SearchInput } from "@/components/search-input"
 import { TagFilter } from "@/components/tag-filter"
-import { mockLeads, mockServiceTemplates, pipelineSummary } from "./_components/mock-freelance"
+import { mockLeads, mockServiceTemplates } from "./_components/mock-freelance"
 import type { Lead } from "@/types"
 
 const statusFilters = ["new", "qualified", "proposal_sent", "won", "lost"]
 
 export default function FreelancePage() {
+  const [leads, setLeads] = React.useState<Lead[]>(mockLeads)
   const [search, setSearch] = React.useState("")
   const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([])
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null)
   const [drawerOpen, setDrawerOpen] = React.useState(false)
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false)
 
-  const filtered = mockLeads.filter((lead) => {
+  const filtered = leads.filter((lead) => {
     const matchesSearch =
       search === "" ||
       lead.businessName.toLowerCase().includes(search.toLowerCase()) ||
@@ -32,9 +35,22 @@ export default function FreelancePage() {
     return matchesSearch && matchesStatus
   })
 
+  // Compute pipeline summary from live lead state
+  const pipelineSummaryData = {
+    new: leads.filter((l) => l.status === "new").length,
+    qualified: leads.filter((l) => l.status === "qualified").length,
+    proposalSent: leads.filter((l) => l.status === "proposal_sent").length,
+    won: leads.filter((l) => l.status === "won").length,
+    lost: leads.filter((l) => l.status === "lost").length,
+  }
+
   function handleSelectLead(lead: Lead) {
     setSelectedLead(lead)
     setDrawerOpen(true)
+  }
+
+  function handleLeadCreated(newLead: Lead) {
+    setLeads((prev) => [newLead, ...prev])
   }
 
   return (
@@ -42,11 +58,15 @@ export default function FreelancePage() {
       <PageHeader
         title="Freelance Workspace"
         description="Move from lead to scoped, profitable work."
-        primaryAction={{ label: "New Lead", icon: <Plus className="size-4" /> }}
+        primaryAction={{
+          label: "New Lead",
+          icon: <Plus className="size-4" />,
+          onClick: () => setIsCreateOpen(true),
+        }}
       />
       <div className="py-4 md:py-6 flex flex-col gap-8 max-w-[1600px] w-full mx-auto">
         {/* Pipeline Summary */}
-        <PipelineSummary summary={pipelineSummary} />
+        <PipelineSummary summary={pipelineSummaryData} />
 
         {/* Lead List */}
         <div>
@@ -69,6 +89,13 @@ export default function FreelancePage() {
 
       {/* Lead Detail Drawer */}
       <LeadDetailDrawer lead={selectedLead} open={drawerOpen} onOpenChange={setDrawerOpen} />
+
+      {/* Create Lead Dialog */}
+      <CreateLeadDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onCreated={handleLeadCreated}
+      />
     </div>
   )
 }

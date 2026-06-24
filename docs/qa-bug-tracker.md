@@ -19,6 +19,7 @@ This document tracks all defects, inconsistencies, and design deviations identif
 | **BUG-003** | 🟡 Medium | Firestore Rules | 🔵 Verified | The `signals` and `opportunities` collections are missing from the `firestore.rules` whitelist collections array. | [firestore.rules:L49](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/firestore.rules#L47-L57) |
 | **BUG-004** | 🔴 High | Agent Orchestration (Prompts) | 🔵 Verified | `formatWorkspace` helper is missing, and prompt templates/resolvers for the 5 new V1.1 workflows (`validate_idea`, `launch_prep`, `delivery_update`, `optimize_product`, `analyze_signals`) are not implemented. | [prompt-templates.ts:L19](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/lib/agents/prompt-templates.ts#L19-L30) |
 | **BUG-005** | 🔴 High | UI Redirects | 🔵 Verified | Legacy `/projects` and `/projects/[projectId]` pages do not redirect to `/workspaces` and `/workspaces/[workspaceId]`. | [projects/page.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/projects/page.tsx) |
+| **BUG-006** | 🔴 High | Freelance UI | 🟢 Resolved | "New Lead" button on `/freelance` page is unresponsive — missing `onClick` handler in `primaryAction` prop. No `CreateLeadDialog` component existed. | [freelance/page.tsx:L45](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/freelance/page.tsx#L45) |
 
 
 ---
@@ -96,6 +97,24 @@ This document tracks all defects, inconsistencies, and design deviations identif
     *   **Status**: 🔵 Verified by QA.
     *   **Details**: Replaced the components in [projects/page.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/projects/page.tsx) and [projects/[projectId]/page.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/projects/[projectId]/page.tsx) with clean, server-side redirects to `/workspaces` and `/workspaces/[workspaceId]` respectively. The detail page un-wrapper awaits the compliant promise-based params for Next.js 15 App Router compatibility.
 
+### BUG-006: "New Lead" button on `/freelance` page is unresponsive
+*   **Severity**: 🔴 High
+*   **Impact**: Users cannot create new leads from the Freelance Workspace page, which is a core workflow for the freelance CRM pipeline. The primary call-to-action button is visually present but completely non-functional.
+*   **Steps to Reproduce**:
+    1. Navigate to `/freelance`.
+    2. Click the "New Lead" button in the page header.
+    3. Observe that nothing happens — no dialog, no navigation, no feedback.
+*   **Root Cause**: The `primaryAction` prop on [freelance/page.tsx:L45](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/freelance/page.tsx#L63-L68) was passed with `label` and `icon` but **no `onClick` handler**. The `PageHeader` component renders `onClick={primaryAction.onClick}` which resolves to `undefined`. Additionally, no `CreateLeadDialog` component existed.
+*   **Resolution**:
+    1. Created new [create-lead-dialog.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/freelance/_components/create-lead-dialog.tsx) following the established `CreateSignalDialog` pattern — full form with validation, toast feedback, and form reset.
+    2. Updated [freelance/page.tsx](file:///c:/Users/dayoo/OneDrive/Dokumente/development/ideoryx/src/app/(dashboard)/freelance/page.tsx) to:
+        - Track leads in component state (instead of raw `mockLeads`)
+        - Wire `onClick: () => setIsCreateOpen(true)` to the `primaryAction` prop
+        - Compute pipeline summary from live state so new leads update the counter immediately
+        - Render `CreateLeadDialog` with `onCreated` callback to prepend new leads
+*   **Resolution Details**:
+    *   **Status**: 🟢 Resolved (awaiting QA verification).
+    *   **Files Changed**: `src/app/(dashboard)/freelance/page.tsx`, `src/app/(dashboard)/freelance/_components/create-lead-dialog.tsx` [NEW]
 
 
 
