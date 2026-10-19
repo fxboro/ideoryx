@@ -22,10 +22,10 @@ export async function getAuthUserId(req: NextRequest): Promise<string | NextResp
   const authHeader = req.headers.get("Authorization");
   const cookieHeader = req.headers.get("cookie");
 
-  // Missing all authentication credentials
-  if (!authHeader && !cookieHeader) {
+  // Check if Supabase keys are configured in environment
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return NextResponse.json(
-      { error: "Missing or invalid authorization header.", success: false },
+      { error: "Unauthorized. Supabase credentials not configured in environment.", success: false },
       { status: 401 }
     );
   }
