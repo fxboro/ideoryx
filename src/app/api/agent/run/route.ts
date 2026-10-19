@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId, handleApiError } from "@/lib/api-auth";
 import { runAgentWorkflowRequestSchema } from "@/lib/validators";
 import { agentRunService } from "@/lib/services/agent-run.service";
+import { runAgentWorkflow } from "@/lib/agents/run-agent-workflow";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,6 +13,38 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = runAgentWorkflowRequestSchema.parse(body);
 
+    // Synchronous execution mode (used by interactive Agents Console)
+    if (data.sync) {
+      const result = await runAgentWorkflow({
+        userId,
+        rawRequest: data,
+      });
+
+      if (!result.success) {
+        return NextResponse.json({
+          success: false,
+          error: result.error || "Workflow execution failed",
+          data: {
+            id: result.agentRunId,
+            durationMs: result.durationMs,
+          }
+        }, { status: 422 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "Agent workflow executed successfully",
+        data: {
+          id: result.agentRunId,
+          output: result.output,
+          nextBestAction: result.nextBestAction,
+          saveActions: result.saveActions,
+          durationMs: result.durationMs,
+        }
+      }, { status: 200 });
+    }
+
+    // Default asynchronous/queued mode
     const id = crypto.randomUUID();
     
     await agentRunService.create(id, {

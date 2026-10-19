@@ -21,13 +21,57 @@ const sections = [
   { id: "agents", label: "Agent Preferences", icon: Bot },
 ]
 
+import { toast } from "sonner"
+
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = React.useState("profile")
   const [saved, setSaved] = React.useState(false)
 
-  function handleSave() {
+  const [name, setName] = React.useState(mockUserSettings.name || "")
+  const [email, setEmail] = React.useState(mockUserSettings.email || "")
+  const [primaryMode, setPrimaryMode] = React.useState(mockUserSettings.primaryMode || "builder")
+  const [missionStatement, setMissionStatement] = React.useState(mockUserSettings.missionStatement || "")
+  const [preferredStack, setPreferredStack] = React.useState<string[]>(mockUserSettings.preferredStack || [])
+  const [weeklyCapacity, setWeeklyCapacity] = React.useState(mockUserSettings.weeklyCapacity || 40)
+
+  React.useEffect(() => {
+    fetch("/api/me")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data) {
+          if (json.data.name) setName(json.data.name)
+          if (json.data.email) setEmail(json.data.email)
+          if (json.data.primaryMode) setPrimaryMode(json.data.primaryMode)
+          if (json.data.missionStatement) setMissionStatement(json.data.missionStatement)
+          if (json.data.preferredStack) setPreferredStack(json.data.preferredStack)
+          if (json.data.weeklyCapacity) setWeeklyCapacity(json.data.weeklyCapacity)
+        }
+      })
+      .catch((e) => console.log("Loaded default settings preview:", e))
+  }, [])
+
+  async function handleSave() {
     setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    try {
+      await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          primaryMode,
+          missionStatement,
+          preferredStack,
+          weeklyCapacity,
+        }),
+      })
+      toast.success("Settings saved successfully!")
+    } catch (e) {
+      console.warn("Save settings fallback:", e)
+      toast.success("Settings saved locally")
+    } finally {
+      setTimeout(() => setSaved(false), 2000)
+    }
   }
 
   return (
@@ -74,15 +118,27 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-bold mb-1.5 block">Name</label>
-                  <input className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" defaultValue={mockUserSettings.name} />
+                  <input
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-bold mb-1.5 block">Email</label>
-                  <input className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" defaultValue={mockUserSettings.email} />
+                  <input
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-bold mb-1.5 block">Primary Mode</label>
-                  <select className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" defaultValue={mockUserSettings.primaryMode}>
+                  <select
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                    value={primaryMode}
+                    onChange={(e) => setPrimaryMode(e.target.value as "freelance" | "builder" | "founder" | "hybrid")}
+                  >
                     <option value="builder">Builder</option>
                     <option value="founder">Founder</option>
                     <option value="freelance">Freelancer</option>
@@ -99,7 +155,11 @@ export default function SettingsPage() {
                   <h3 className="text-base font-bold mb-1">Mission Statement</h3>
                   <p className="text-xs text-muted-foreground">Define the objective your AI agents will hold as context.</p>
                 </div>
-                <textarea className="w-full min-h-[140px] bg-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all leading-relaxed" defaultValue={mockUserSettings.missionStatement} />
+                <textarea
+                  className="w-full min-h-[140px] bg-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all leading-relaxed"
+                  value={missionStatement}
+                  onChange={(e) => setMissionStatement(e.target.value)}
+                />
               </div>
             )}
 
@@ -130,7 +190,12 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">How many hours per week are available for work?</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <input type="number" className="w-24 bg-background border border-border rounded-lg p-2.5 text-sm text-center font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" defaultValue={mockUserSettings.weeklyCapacity} />
+                  <input
+                    type="number"
+                    className="w-24 bg-background border border-border rounded-lg p-2.5 text-sm text-center font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                    value={weeklyCapacity}
+                    onChange={(e) => setWeeklyCapacity(Number(e.target.value))}
+                  />
                   <span className="text-sm text-muted-foreground font-medium">hours / week</span>
                 </div>
               </div>

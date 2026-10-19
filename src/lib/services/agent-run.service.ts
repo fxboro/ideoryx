@@ -1,4 +1,4 @@
-import { BaseService } from "./base.service";
+import { BaseService, toCamelCase } from "./base.service";
 import { AgentRunSchemaType, agentRunSchema } from "../validators";
 
 export class AgentRunService extends BaseService<AgentRunSchemaType> {
@@ -7,12 +7,14 @@ export class AgentRunService extends BaseService<AgentRunSchemaType> {
   }
 
   async getRecentAgentRuns(userId: string, limit: number = 5): Promise<AgentRunSchemaType[]> {
-    const snapshot = await this.collection
-      .where("userId", "==", userId)
-      .orderBy("createdAt", "desc")
-      .limit(limit)
-      .get();
-    return snapshot.docs.map((doc) => doc.data() as AgentRunSchemaType);
+    const supabase = await this.getClient();
+    const { data } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data || []).map((row: any) => toCamelCase(row) as AgentRunSchemaType);
   }
 }
 

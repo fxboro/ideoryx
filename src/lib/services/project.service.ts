@@ -1,4 +1,4 @@
-import { BaseService } from "./base.service";
+import { BaseService, toCamelCase } from "./base.service";
 import { ProjectSchemaType, projectSchema } from "../validators";
 
 export class ProjectService extends BaseService<ProjectSchemaType> {
@@ -7,12 +7,14 @@ export class ProjectService extends BaseService<ProjectSchemaType> {
   }
 
   async getActiveProjects(userId: string): Promise<ProjectSchemaType[]> {
-    const snapshot = await this.collection
-      .where("userId", "==", userId)
-      .where("status", "==", "active")
-      .orderBy("updatedAt", "desc")
-      .get();
-    return snapshot.docs.map((doc) => doc.data() as ProjectSchemaType);
+    const supabase = await this.getClient();
+    const { data } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("updated_at", { ascending: false });
+    return (data || []).map((row: any) => toCamelCase(row) as ProjectSchemaType);
   }
 }
 

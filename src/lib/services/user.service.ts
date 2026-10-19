@@ -1,41 +1,47 @@
-import { db } from "../firebase/admin";
+import { getDbClient } from "../supabase/db";
 import { UserSchemaType, userSchema } from "../validators";
+import { toCamelCase, toSnakeCase } from "./base.service";
 
 export class UserService {
-  private collection = db.collection("users");
+  private tableName = "profiles";
+
+  private async getClient() {
+    return await getDbClient();
+  }
 
   async getByUid(uid: string): Promise<UserSchemaType | null> {
-    const doc = await this.collection.doc(uid).get();
-    if (!doc.exists) return null;
-    return doc.data() as UserSchemaType;
+    const supabase = await this.getClient();
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("id", uid)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return toCamelCase(data) as UserSchemaType;
   }
 
   async createOrUpdate(uid: string, data: Partial<UserSchemaType>): Promise<void> {
     const now = Date.now();
-    
-    const doc = await this.collection.doc(uid).get();
-    let payload;
+    const existing = await this.getByUid(uid);
+    const supabase = await this.getClient();
 
-    if (!doc.exists) {
-      payload = {
+    if (!existing) {
+      const payload = {
         ...data,
         uid,
         createdAt: now,
       };
-      
-      // Strict parse on creation
       userSchema.parse(payload);
-      
-      await this.collection.doc(uid).set(payload);
+      const dbPayload = toSnakeCase({ ...payload, id: uid });
+      await supabase.from(this.tableName).insert(dbPayload);
     } else {
-      payload = {
+      const payload = {
         ...data,
       };
-      
-      // Partial parse on update
       userSchema.partial().parse(payload);
-      
-      await this.collection.doc(uid).update(payload);
+      const dbPayload = toSnakeCase(payload);
+      await supabase.from(this.tableName).update(dbPayload).eq("id", uid);
     }
   }
 }

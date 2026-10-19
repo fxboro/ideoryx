@@ -1,4 +1,4 @@
-import { BaseService } from "./base.service";
+import { BaseService, toCamelCase } from "./base.service";
 import { SignalSchemaType, signalSchema } from "../validators";
 import { Signal, SignalStatus } from "../../types";
 
@@ -27,11 +27,15 @@ export class SignalService extends BaseService<SignalSchemaType> {
   }
 
   async listSignalsByWorkspace(workspaceId: string): Promise<Signal[]> {
-    const snapshot = await this.collection
-      .where("workspaceId", "==", workspaceId)
-      .orderBy("createdAt", "desc")
-      .get();
-    return snapshot.docs.map((doc) => doc.data() as Signal);
+    const supabase = await this.getClient();
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((row: any) => toCamelCase(row) as Signal);
   }
 
   async updateSignalStatus(id: string, status: SignalStatus): Promise<void> {

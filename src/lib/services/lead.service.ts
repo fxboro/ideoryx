@@ -1,4 +1,4 @@
-import { BaseService } from "./base.service";
+import { BaseService, toCamelCase } from "./base.service";
 import { LeadSchemaType, leadSchema } from "../validators";
 
 export class LeadService extends BaseService<LeadSchemaType> {
@@ -7,12 +7,14 @@ export class LeadService extends BaseService<LeadSchemaType> {
   }
 
   async getOpenLeads(userId: string): Promise<LeadSchemaType[]> {
-    const snapshot = await this.collection
-      .where("userId", "==", userId)
-      .where("status", "in", ["new", "qualified", "proposal_sent"])
-      .orderBy("updatedAt", "desc")
-      .get();
-    return snapshot.docs.map((doc) => doc.data() as LeadSchemaType);
+    const supabase = await this.getClient();
+    const { data } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["new", "qualified", "proposal_sent"])
+      .order("updated_at", { ascending: false });
+    return (data || []).map((row: any) => toCamelCase(row) as LeadSchemaType);
   }
 }
 

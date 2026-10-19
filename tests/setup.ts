@@ -1,42 +1,19 @@
-import { vi, beforeEach } from "vitest";
+import { beforeEach } from "vitest";
 import { MockFirestore } from "./helpers/firebase-mock";
+import { MockSupabase } from "./helpers/supabase-mock";
+import { setTestMockClient } from "@/lib/supabase/db";
 
-// Create a singleton instance of the mock Firestore
+// Singleton mock instances for testing
 export const mockFirestoreInstance = new MockFirestore();
+export const mockSupabaseInstance = new MockSupabase();
 
-// Mock the Firebase Admin module
-vi.mock("@/lib/firebase/admin", () => {
-  return {
-    db: mockFirestoreInstance,
-    auth: {
-      verifyIdToken: async (token: string) => {
-        if (token === "valid-token") {
-          return { uid: "test-user-id", email: "test@example.com" };
-        }
-        throw new Error("Invalid token");
-      },
-    },
-    admin: {
-      apps: [],
-      initializeApp: () => {},
-      credential: {
-        applicationDefault: () => ({}),
-      },
-      firestore: () => mockFirestoreInstance,
-      auth: () => ({
-        verifyIdToken: async (token: string) => {
-          if (token === "valid-token") {
-            return { uid: "test-user-id", email: "test@example.com" };
-          }
-          throw new Error("Invalid token");
-        },
-      }),
-    },
-  };
-});
+// Connect the test mock client to the database resolver and mirror stores
+mockFirestoreInstance.mirrorTarget = mockSupabaseInstance;
+mockSupabaseInstance.mirrorTarget = mockFirestoreInstance;
+setTestMockClient(mockSupabaseInstance);
 
-// Mock randomUUID in crypto if needed or let it use native
-// Reset mock database before each test run
+// Reset mock databases before each test run
 beforeEach(() => {
   mockFirestoreInstance.clear();
+  mockSupabaseInstance.clear();
 });

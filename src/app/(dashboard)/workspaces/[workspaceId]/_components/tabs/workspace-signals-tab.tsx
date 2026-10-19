@@ -30,17 +30,17 @@ interface WorkspaceSignalsTabProps {
 }
 
 export function WorkspaceSignalsTab({ workspace }: WorkspaceSignalsTabProps) {
-  const [signals, setSignals] = useState<Signal[]>([])
+  const [signals, setSignals] = useState<Signal[]>(() => {
+    if (typeof window !== "undefined") {
+      return getStoredSignals()
+    }
+    return []
+  })
   const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
   
   // Dialog/Drawer control
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
-
-  // Load signals on mount
-  useEffect(() => {
-    setSignals(getStoredSignals())
-  }, [])
 
   // Filter signals specific to this workspace
   const workspaceSignals = signals.filter(s => s.workspaceId === workspace.id)

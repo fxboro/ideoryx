@@ -14,12 +14,37 @@ import type { Decision } from "@/types"
 const projectLabels = [...new Set(mockDecisions.map((d) => d.projectId).filter(Boolean))] as string[]
 
 export default function DecisionsPage() {
+  const [decisions, setDecisions] = React.useState<Decision[]>(mockDecisions)
   const [search, setSearch] = React.useState("")
   const [selectedProjects, setSelectedProjects] = React.useState<string[]>([])
   const [selectedDecision, setSelectedDecision] = React.useState<Decision | null>(null)
   const [drawerOpen, setDrawerOpen] = React.useState(false)
 
-  const filtered = mockDecisions.filter((d) => {
+  React.useEffect(() => {
+    let isMounted = true
+    async function loadDecisions() {
+      try {
+        const res = await fetch("/api/decisions")
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && json.data && isMounted) {
+            const apiDecisions = json.data as Decision[]
+            if (apiDecisions.length > 0) {
+              setDecisions(apiDecisions)
+            }
+          }
+        }
+      } catch {
+        // Fallback to mock
+      }
+    }
+    loadDecisions()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const filtered = decisions.filter((d) => {
     const matchesSearch =
       search === "" ||
       d.title.toLowerCase().includes(search.toLowerCase()) ||

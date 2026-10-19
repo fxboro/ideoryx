@@ -51,8 +51,49 @@ export default function SignalsPage() {
 
   // Load datasets on mount
   useEffect(() => {
-    setSignals(getStoredSignals())
-    setWorkspaces(getStoredWorkspaces())
+    let isMounted = true
+    async function loadData() {
+      // 1. Load Workspaces
+      try {
+        const wsRes = await fetch("/api/workspaces")
+        if (wsRes.ok) {
+          const wsJson = await wsRes.json()
+          if (wsJson.success && wsJson.data && isMounted) {
+            setWorkspaces(wsJson.data)
+          }
+        } else {
+          if (isMounted) setWorkspaces(getStoredWorkspaces())
+        }
+      } catch {
+        if (isMounted) setWorkspaces(getStoredWorkspaces())
+      }
+
+      // 2. Load Signals
+      try {
+        const sigRes = await fetch("/api/signals")
+        if (sigRes.ok) {
+          const sigJson = await sigRes.json()
+          if (sigJson.success && sigJson.data && isMounted) {
+            const apiSignals = sigJson.data as Signal[]
+            if (apiSignals.length > 0) {
+              setSignals(apiSignals)
+              return
+            }
+          }
+        }
+      } catch {
+        // Fallback to local
+      }
+
+      if (isMounted) {
+        setSignals(getStoredSignals())
+      }
+    }
+
+    loadData()
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // Triage state for conversion wizard
@@ -64,7 +105,7 @@ export default function SignalsPage() {
     setIsConvertOpen(true)
   }
 
-  const handleSignalConverted = (newOpportunity: Opportunity) => {
+  const handleSignalConverted = async (newOpportunity: Opportunity) => {
     try {
       const existingOpsData = localStorage.getItem("mission_control_opportunities")
       const existingOps = existingOpsData ? JSON.parse(existingOpsData) : []
@@ -74,6 +115,13 @@ export default function SignalsPage() {
       if (!exists) {
         localStorage.setItem("mission_control_opportunities", JSON.stringify([newOpportunity, ...existingOps]))
       }
+
+      // Also sync to remote DB
+      await fetch("/api/opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newOpportunity),
+      }).catch((err) => console.warn("Could not save opportunity to server:", err))
     } catch (e) {
       console.error("Failed to save opportunity during conversion", e)
     }
@@ -83,14 +131,24 @@ export default function SignalsPage() {
   }
 
   // Ingestion handler
-  const handleCreated = (newSignal: Signal) => {
+  const handleCreated = async (newSignal: Signal) => {
     const updated = [newSignal, ...signals]
     setSignals(updated)
     saveStoredSignals(updated)
+
+    try {
+      await fetch("/api/signals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSignal),
+      })
+    } catch (err) {
+      console.warn("Could not sync created signal to server:", err)
+    }
   }
 
   // Triage state handler
-  const handleStatusChange = (signalId: string, newStatus: SignalStatus) => {
+  const handleStatusChange = async (signalId: string, newStatus: SignalStatus) => {
     const updated = signals.map((s) => {
       if (s.id === signalId) {
         return { ...s, status: newStatus, updatedAt: Date.now() }
@@ -104,6 +162,16 @@ export default function SignalsPage() {
     // Sync selected signal state
     if (selectedSignal && selectedSignal.id === signalId) {
       setSelectedSignal({ ...selectedSignal, status: newStatus, updatedAt: Date.now() })
+    }
+
+    try {
+      await fetch("/api/signals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: signalId, status: newStatus }),
+      })
+    } catch (err) {
+      console.warn("Could not sync signal status to server:", err)
     }
 
     if (newStatus === "converted") {

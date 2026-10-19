@@ -24,9 +24,18 @@ export default function WorkspacesPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [riskFilter, setRiskFilter] = useState("all")
 
-  // Load from local storage
+  // Load from database
   useEffect(() => {
-    setWorkspaces(getStoredWorkspaces())
+    fetch("/api/workspaces")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+          setWorkspaces(json.data)
+        } else {
+          setWorkspaces(getStoredWorkspaces())
+        }
+      })
+      .catch(() => setWorkspaces(getStoredWorkspaces()))
   }, [])
 
   // Save changes

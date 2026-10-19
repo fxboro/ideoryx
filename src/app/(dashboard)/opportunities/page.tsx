@@ -64,9 +64,66 @@ export default function OpportunitiesPage() {
 
   // Load datasets on mount
   useEffect(() => {
-    setOpportunities(getStoredOpportunities())
-    setWorkspaces(getStoredWorkspaces())
-    setSignals(getStoredSignals())
+    let isMounted = true
+    async function loadData() {
+      // 1. Workspaces
+      try {
+        const wsRes = await fetch("/api/workspaces")
+        if (wsRes.ok) {
+          const wsJson = await wsRes.json()
+          if (wsJson.success && wsJson.data && isMounted) {
+            setWorkspaces(wsJson.data)
+          }
+        } else if (isMounted) {
+          setWorkspaces(getStoredWorkspaces())
+        }
+      } catch {
+        if (isMounted) setWorkspaces(getStoredWorkspaces())
+      }
+
+      // 2. Signals
+      try {
+        const sigRes = await fetch("/api/signals")
+        if (sigRes.ok) {
+          const sigJson = await sigRes.json()
+          if (sigJson.success && sigJson.data && isMounted) {
+            const list = sigJson.data as Signal[]
+            if (list.length > 0) setSignals(list)
+            else setSignals(getStoredSignals())
+          }
+        } else if (isMounted) {
+          setSignals(getStoredSignals())
+        }
+      } catch {
+        if (isMounted) setSignals(getStoredSignals())
+      }
+
+      // 3. Opportunities
+      try {
+        const oppRes = await fetch("/api/opportunities")
+        if (oppRes.ok) {
+          const oppJson = await oppRes.json()
+          if (oppJson.success && oppJson.data && isMounted) {
+            const list = oppJson.data as Opportunity[]
+            if (list.length > 0) {
+              setOpportunities(list)
+              return
+            }
+          }
+        }
+      } catch {
+        // Fallback
+      }
+
+      if (isMounted) {
+        setOpportunities(getStoredOpportunities())
+      }
+    }
+
+    loadData()
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // Resolve Workspace Name
@@ -99,7 +156,7 @@ export default function OpportunitiesPage() {
   })
 
   // Opportunity change handler (sliders / status)
-  const handleOpportunityChange = (updatedOp: Opportunity) => {
+  const handleOpportunityChange = async (updatedOp: Opportunity) => {
     const updated = opportunities.map((op) => (op.id === updatedOp.id ? updatedOp : op))
     setOpportunities(updated)
     saveStoredOpportunities(updated)
@@ -109,38 +166,76 @@ export default function OpportunitiesPage() {
       setSelectedOpportunity(updatedOp)
     }
 
+    try {
+      await fetch("/api/opportunities", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedOp),
+      })
+    } catch (err) {
+      console.warn("Could not sync updated opportunity to server:", err)
+    }
+
     toast.success(`Opportunity "${updatedOp.title}" updated successfully!`)
   }
 
   // Handle conversion of signal to opportunity
-  const handleSignalConverted = (newOpportunity: Opportunity) => {
+  const handleSignalConverted = async (newOpportunity: Opportunity) => {
     // Add opportunity
     const updatedOps = [newOpportunity, ...opportunities]
     setOpportunities(updatedOps)
     saveStoredOpportunities(updatedOps)
 
+    try {
+      await fetch("/api/opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newOpportunity),
+      })
+    } catch (err) {
+      console.warn("Could not save new opportunity to server:", err)
+    }
+
     // Mark signal as converted
     const signalId = newOpportunity.sourceSignalIds[0]
-    const updatedSignals = signals.map((s) => {
-      if (s.id === signalId) {
-        return { ...s, status: "converted" as const, updatedAt: Date.now() }
+    if (signalId) {
+      const updatedSignals = signals.map((s) => {
+        if (s.id === signalId) {
+          return { ...s, status: "converted" as const, updatedAt: Date.now() }
+        }
+        return s
+      })
+      setSignals(updatedSignals)
+      saveStoredSignals(updatedSignals)
+
+      try {
+        await fetch("/api/signals", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: signalId, status: "converted" }),
+        })
+      } catch (err) {
+        console.warn("Could not sync signal conversion status to server:", err)
       }
-      return s
-    })
-    setSignals(updatedSignals)
-    saveStoredSignals(updatedSignals)
+    }
 
     // Remove from suggested list if it was there
     setSuggestedSignals((prev) => prev.filter((s) => s.id !== signalId))
   }
 
   // Actions confirmations callback
-  const handleTaskCreated = (newTask: Task) => {
+  const handleTaskCreated = async (newTask: Task) => {
     // Save to task localStorage list for full persistence demo
     try {
       const existingTasksData = localStorage.getItem("mission_control_tasks")
       const existingTasks = existingTasksData ? JSON.parse(existingTasksData) : []
       localStorage.setItem("mission_control_tasks", JSON.stringify([newTask, ...existingTasks]))
+
+      await fetch("/api/save-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actionType: "task", data: newTask }),
+      }).catch((err) => console.warn("Could not persist task to server:", err))
     } catch (e) {
       console.error(e)
     }

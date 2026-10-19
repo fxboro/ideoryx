@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Search, Plus, Zap, Bell, User, Settings } from "lucide-react"
+import Link from "next/link"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -74,9 +75,11 @@ export function TopNav() {
         </Button>
         
         {/* Run Agent — icon on tablet, full on desktop */}
-        <Button variant="default" size="sm" className="hidden md:flex h-9 bg-primary text-primary-foreground gap-2 px-2 lg:px-4 shadow-md hover:shadow-lg transition-all active:scale-95">
-          <Zap className="size-4 fill-primary-foreground" />
-          <span className="text-sm font-bold tracking-tight hidden lg:inline">Run Agent</span>
+        <Button asChild variant="default" size="sm" className="hidden md:flex h-9 bg-primary text-primary-foreground gap-2 px-2 lg:px-4 shadow-md hover:shadow-lg transition-all active:scale-95">
+          <Link href="/agents">
+            <Zap className="size-4 fill-primary-foreground" />
+            <span className="text-sm font-bold tracking-tight hidden lg:inline">Run Agent</span>
+          </Link>
         </Button>
 
         <div className="flex items-center gap-1.5 md:gap-2 border-l border-border pl-2 md:pl-3">
@@ -90,26 +93,42 @@ export function TopNav() {
               <Button variant="ghost" size="icon" className="size-9 rounded-full ring-1 ring-border p-0 hover:bg-muted overflow-hidden touch-target">
                 <Avatar className="size-full">
                   <AvatarImage src="" alt="User" />
-                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">CH</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">ID</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 mt-2 border-border p-1 shadow-xl">
               <DropdownMenuLabel className="px-2 py-1.5 flex flex-col gap-0.5">
-                <span className="text-sm font-bold">Chima Operating</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Builder Tier</span>
+                <span className="text-sm font-bold">Ideoryx OS</span>
+                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Beta Workspace</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 focus:bg-primary/5 cursor-pointer">
-                <User className="size-4" />
-                <span className="font-medium">Profile</span>
+              <DropdownMenuItem asChild className="flex items-center gap-2 focus:bg-primary/5 cursor-pointer">
+                <Link href="/settings">
+                  <User className="size-4" />
+                  <span className="font-medium">Profile</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-2 focus:bg-primary/5 cursor-pointer">
-                <Settings className="size-4" />
-                <span className="font-medium">Settings</span>
+              <DropdownMenuItem asChild className="flex items-center gap-2 focus:bg-primary/5 cursor-pointer">
+                <Link href="/settings">
+                  <Settings className="size-4" />
+                  <span className="font-medium">Settings</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:bg-destructive/5 font-medium cursor-pointer">
+              <DropdownMenuItem
+                className="text-destructive focus:bg-destructive/5 font-medium cursor-pointer"
+                onClick={async () => {
+                  try {
+                    const { createClient } = await import("@/lib/supabase/client");
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                  } catch (e) {
+                    console.log("Signout local:", e);
+                  }
+                  window.location.href = "/login";
+                }}
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

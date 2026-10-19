@@ -4,7 +4,8 @@
  */
 export class MockFirestore {
   // Store data as: collectionName -> docId -> documentData
-  private store: Record<string, Record<string, any>> = {};
+  public store: Record<string, Record<string, any>> = {};
+  public mirrorTarget?: any;
 
   /**
    * Reset all collection data.
@@ -21,6 +22,9 @@ export class MockFirestore {
       this.store[collectionName] = {};
     }
     this.store[collectionName][id] = { ...data, id };
+    if (this.mirrorTarget?.seed) {
+      this.mirrorTarget.seed(collectionName, id, data);
+    }
   }
 
   /**

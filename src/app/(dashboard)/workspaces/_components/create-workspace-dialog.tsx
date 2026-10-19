@@ -59,12 +59,13 @@ export function CreateWorkspaceDialog({
       ? JSON.parse(JSON.stringify(MOCK_PRODUCT_CHECKLISTS))
       : JSON.parse(JSON.stringify(MOCK_CLIENT_CHECKLISTS));
 
-    const id = "w_" + crypto.randomUUID().substring(0, 8);
+    const id = "ws_" + crypto.randomUUID().substring(0, 8);
 
     const newWorkspace: Workspace = {
       id,
       userId: "user1",
       name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       workspaceType,
       status: "active",
       summary,
@@ -76,12 +77,37 @@ export function CreateWorkspaceDialog({
       risk,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      // Compat fields
       type: workspaceType === "product" ? "product" : "freelance",
       phase: workspaceType === "product" ? "spec" : "launch"
     };
 
-    onCreated(newWorkspace)
+    // Persist to Supabase backend API
+    fetch("/api/workspaces", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        slug: newWorkspace.slug,
+        workspaceType,
+        summary,
+        stage,
+        risk,
+        currentFocus,
+        nextMilestone,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data) {
+          onCreated(json.data)
+        } else {
+          onCreated(newWorkspace)
+        }
+      })
+      .catch(() => {
+        onCreated(newWorkspace)
+      })
+
     toast.success(`Workspace "${name}" successfully created!`)
     
     // Reset state

@@ -1,4 +1,4 @@
-import { BaseService } from "./base.service";
+import { BaseService, toCamelCase } from "./base.service";
 import { OpportunitySchemaType, opportunitySchema } from "../validators";
 import { Opportunity, OpportunityStatus } from "../../types";
 
@@ -27,11 +27,15 @@ export class OpportunityService extends BaseService<OpportunitySchemaType> {
   }
 
   async listOpportunitiesByWorkspace(workspaceId: string): Promise<Opportunity[]> {
-    const snapshot = await this.collection
-      .where("workspaceId", "==", workspaceId)
-      .orderBy("score", "desc")
-      .get();
-    return snapshot.docs.map((doc) => doc.data() as Opportunity);
+    const supabase = await this.getClient();
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("workspace_id", workspaceId)
+      .order("score", { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((row: any) => toCamelCase(row) as Opportunity);
   }
 
   async updateOpportunityStatus(id: string, status: OpportunityStatus): Promise<void> {

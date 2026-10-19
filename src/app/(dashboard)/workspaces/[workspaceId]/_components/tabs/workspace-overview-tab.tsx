@@ -103,7 +103,7 @@ export function WorkspaceOverviewTab({ workspace, tasks, goals, decisions, agent
               {agentRuns.length > 0 && agentRuns[0] ? (
                  <div className="flex flex-col gap-3">
                     <p className="text-xs font-bold uppercase tracking-wider text-primary/70">{agentRuns[0].agentRole} Agent</p>
-                    <p className="text-sm font-semibold">"{agentRuns[0].inputGoal}"</p>
+                    <p className="text-sm font-semibold">&ldquo;{agentRuns[0].inputGoal}&rdquo;</p>
                     <button className="w-full text-xs font-bold bg-primary text-primary-foreground py-2 rounded mt-2 hover:bg-primary/95 shadow">View Output Detail</button>
                  </div>
               ) : (

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ProgressBar } from "@/components/progress-bar"
 import Link from "next/link"
-import { Zap, ArrowLeft, ArrowRight, Check, User, Target, Code, Clock, Briefcase } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Zap, ArrowLeft, ArrowRight, Check, User, Target, Code, Clock, Briefcase, Loader2 } from "lucide-react"
 
 const STEPS = [
   { id: 1, label: "Identity", icon: User },
@@ -42,6 +43,33 @@ export default function OnboardingPage() {
   const [capacity, setCapacity] = React.useState(40)
   const [businessFocus, setBusinessFocus] = React.useState<string[]>([])
   const [growthFocus, setGrowthFocus] = React.useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const router = useRouter()
+
+  async function handleFinishOnboarding() {
+    setIsSubmitting(true)
+    try {
+      await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name || "Founder",
+          email,
+          primaryMode: mode,
+          missionStatement: mission,
+          preferredStack: selectedStack,
+          weeklyCapacity: capacity,
+          businessFocus,
+          growthFocus,
+          onboardingCompleted: true,
+        }),
+      })
+    } catch (err) {
+      console.warn("Failed to persist profile:", err)
+    } finally {
+      router.push("/today")
+    }
+  }
 
   function toggleItem(arr: string[], item: string, setter: (v: string[]) => void) {
     if (arr.includes(item)) {
@@ -319,10 +347,17 @@ export default function OnboardingPage() {
               Next <ArrowRight className="size-3.5" />
             </Button>
           ) : (
-            <Button asChild className="w-full sm:w-auto font-bold gap-1.5 h-11 shadow-lg shadow-primary/20">
-              <Link href="/today">
-                <Zap className="size-3.5" /> Launch Dashboard
-              </Link>
+            <Button
+              onClick={handleFinishOnboarding}
+              disabled={isSubmitting}
+              className="w-full sm:w-auto font-bold gap-1.5 h-11 shadow-lg shadow-primary/20"
+            >
+              {isSubmitting ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Zap className="size-3.5" />
+              )}
+              Launch Dashboard
             </Button>
           )}
         </div>

@@ -20,17 +20,56 @@ export default function WorkspaceDetailPage({ params }: { params: Promise<{ work
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const list = getStoredWorkspaces()
-    const found = list.find(w => w.id === workspaceId) || null
-    setWorkspace(found)
-    setLoading(false)
+    let isMounted = true
+
+    async function loadWorkspace() {
+      try {
+        const res = await fetch(`/api/workspaces/${workspaceId}`)
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && json.data && isMounted) {
+            setWorkspace(json.data)
+            setLoading(false)
+            return
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch remote workspace, checking local store:", err)
+      }
+
+      if (isMounted) {
+        const list = getStoredWorkspaces()
+        const found = list.find(w => w.id === workspaceId) || null
+        setWorkspace(found)
+        setLoading(false)
+      }
+    }
+
+    loadWorkspace()
+    return () => {
+      isMounted = false
+    }
   }, [workspaceId])
 
-  const handleWorkspaceUpdated = (updatedWorkspace: Workspace) => {
+  const handleWorkspaceUpdated = async (updatedWorkspace: Workspace) => {
     setWorkspace(updatedWorkspace)
     const list = getStoredWorkspaces()
     const updatedList = list.map(w => w.id === updatedWorkspace.id ? updatedWorkspace : w)
     saveStoredWorkspaces(updatedList)
+
+    try {
+      await fetch(`/api/workspaces/${updatedWorkspace.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stage: updatedWorkspace.stage,
+          checklists: updatedWorkspace.checklists,
+          readinessScore: updatedWorkspace.readinessScore,
+        }),
+      })
+    } catch (err) {
+      console.warn("Could not sync workspace update to server:", err)
+    }
   }
 
   if (loading) {

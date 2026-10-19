@@ -163,6 +163,7 @@ export type StageChecklistSchemaType = z.infer<typeof stageChecklistSchema>;
 
 export const workspaceSchema = baseEntitySchema.extend({
   name: z.string().min(1, "Name is required"),
+  slug: z.string().optional(),
   workspaceType: workspaceTypeSchema,
   status: workspaceStatusSchema,
   summary: z.string().min(1, "Summary is required"),
@@ -362,6 +363,7 @@ export const runAgentWorkflowRequestSchema = z.object({
   leadId: z.string().optional(),
   contextTags: z.array(z.string()).optional(),
   context: z.string().optional(), // additional user-provided context
+  sync: z.boolean().optional(),   // when true, returns real workflow output synchronously
 });
 export type RunAgentWorkflowRequest = z.infer<typeof runAgentWorkflowRequestSchema>;
 

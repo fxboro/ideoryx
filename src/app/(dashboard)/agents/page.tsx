@@ -62,20 +62,14 @@ function AgentsPageContent() {
     setSelectedWorkflow(workflow)
   }
 
-  function handleRun() {
+  async function handleRun() {
     if (!selectedAgent || !selectedWorkflow) return
 
     setIsRunning(true)
     setOutput(null)
 
-    // Simulate API latency
-    setTimeout(() => {
-      const result = getMockOutput(selectedAgent, selectedWorkflow)
-      setOutput(result)
-      setIsRunning(false)
-      
-      // persist new run simulation to Firestore
-      fetch("/api/agent/run", {
+    try {
+      const res = await fetch("/api/agent/run", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,14 +77,65 @@ function AgentsPageContent() {
         body: JSON.stringify({
           agentRole: selectedAgent,
           workflowType: selectedWorkflow,
-          inputGoal: goal || "Simulated Run",
+          inputGoal: goal || "Execute agent workflow",
           workspaceId: selectedWorkspaceId,
           projectId: selectedProject,
           leadId: selectedLead,
           contextTags,
+          sync: true,
         }),
-      }).catch((e) => console.log("Silent persist skipped in frontend simulation", e))
-    }, 1800)
+      })
+
+      if (res.ok) {
+        const json = await res.json()
+        if (json.data?.output) {
+          const out = json.data.output
+          const sections = [
+            {
+              id: "summary",
+              title: "Executive Summary",
+              content: out.summary || out.analysis || "Workflow executed successfully.",
+              type: "text" as const,
+            },
+            ...(out.recommendations ? [{
+              id: "recommendations",
+              title: "Key Recommendations",
+              content: "",
+              type: "list" as const,
+              items: Array.isArray(out.recommendations) ? out.recommendations : [String(out.recommendations)],
+            }] : []),
+          ]
+
+          setOutput({
+            agentType: selectedAgent,
+            workflowName: selectedWorkflow.replace(/_/g, " "),
+            timestamp: Date.now(),
+            sections,
+            nextBestAction: typeof json.data.nextBestAction === "object" && json.data.nextBestAction !== null
+              ? json.data.nextBestAction
+              : {
+                  title: "Review Generated Plan",
+                  description: typeof json.data.nextBestAction === "string" ? json.data.nextBestAction : "Review the agent output and save proposed actions to your workspace.",
+                  actionLabel: "Apply to Workspace",
+                },
+            saveActions: json.data.saveActions || [],
+          })
+          toast.success("Agent workflow executed successfully!")
+          return
+        }
+      }
+
+      // Fallback to sample output if no vendor API key configured yet
+      const fallbackResult = getMockOutput(selectedAgent, selectedWorkflow)
+      setOutput(fallbackResult)
+      toast.info("Generated sample agent output")
+    } catch (err) {
+      console.warn("Using sample output fallback:", err)
+      const fallbackResult = getMockOutput(selectedAgent, selectedWorkflow)
+      setOutput(fallbackResult)
+    } finally {
+      setIsRunning(false)
+    }
   }
 
   function handleSaveAction(actionKey: string, payload: any) {
@@ -100,6 +145,17 @@ function AgentsPageContent() {
       // Resolve collection from output saveActions list
       const actionDef = output?.saveActions.find((a) => a.key === actionKey)
       const collection = actionDef?.collection || actionKey
+      
+      // Persist to Supabase backend API
+      fetch("/api/save-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          collection,
+          payload,
+          workspaceId: targetWorkspaceId,
+        }),
+      }).catch((e) => console.log("API save fallback:", e))
       
       switch (collection) {
         case "signals": {

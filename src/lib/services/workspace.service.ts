@@ -13,7 +13,7 @@ export const DEFAULT_PRODUCT_CHECKLISTS: Record<string, WorkspaceChecklistItem[]
   spec: [
     { id: "s1", stage: "spec", label: "Write MVP specifications and scope", completed: false },
     { id: "s2", stage: "spec", label: "Design modular system architecture", completed: false },
-    { id: "s3", stage: "spec", label: "Draft Firestore collection/schema details", completed: false },
+    { id: "s3", stage: "spec", label: "Draft Supabase database schema & RLS policies", completed: false },
     { id: "s4", stage: "spec", label: "Define milestone timeline and delivery targets", completed: false },
   ],
   build: [
@@ -110,7 +110,7 @@ export class WorkspaceService extends BaseService<WorkspaceSchemaType> {
   }
 
   async updateWorkspace(id: string, data: Partial<Workspace>): Promise<void> {
-    let updatedData = { ...data };
+    const updatedData = { ...data };
     if (data.checklists || data.stage) {
       if (data.checklists && data.stage) {
         // No read needed if both checklists and stage are supplied in updates

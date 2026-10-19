@@ -100,6 +100,7 @@ export interface StageChecklist {
 
 export interface Workspace extends BaseEntity {
   name: string;
+  slug?: string;
   workspaceType: WorkspaceType;
   status: WorkspaceStatus;
   summary: string;
